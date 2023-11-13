@@ -1,0 +1,16 @@
+Projekt procesu przemysłowego parzenia herbaty na Podstawy Automatyki:
+0. Biblioteki: Pandas, Matplotlib, NumPy, SciPy, Tkinter
+1. Budowa bazowego interfejsu aplikacji:
+	a) budowa prostego okna aplikacji (określenie atrybutów okna)
+	b) brak menu plikowego, na rzecz budowy aplikacji zakładkowej. Zbudowanie szkieletu zakładek programu (tj. wizualizacja procesu, wejścia, sterowanie, wyjścia, wykresy)
+	c) budowa szkieletu wizualizacyjnego procesu (wykorzystanie grafiki wektorowej albo obiektów graficznych dostępnych w bibliotece do stworzenia schematu)
+2. Budowa zakładki wizualizacji:
+	a) zgłaszanie parametrów czujników
+3. Budowa symulatora czasu
+4. Budowa zakładki wejść:
+	a) określanie poziomów wody, ziół, określenie pojemności zbiorników
+5. Budowa zakładki sterowania:
+	a) określanie czasu otwarcia zaworów, prędkości silnika, temperatury grzałki
+6. Budowa zakładki wyjść:
+	a) wyświetlenie w określonej formie (tabela?) parametrów procesu
+7. Budowa okna wykresów
