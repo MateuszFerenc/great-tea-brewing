@@ -1,0 +1,6 @@
+# Features to implement list
+# Fill box '[]' with proper option
+# [✓] - done, [i] - in progress, [-] - won't do, [d] - discussion needed
+[d] - implement realtime simulation
+[d] - implement fast simulation, i.e. run simulation as fast as possible with given parameters and output data, and compute how much time it could took in real time
+[] - simulation controls in main frame (schematic frame)
