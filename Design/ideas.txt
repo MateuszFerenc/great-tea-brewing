@@ -4,3 +4,6 @@
 [d] - implement realtime simulation
 [d] - implement fast simulation, i.e. run simulation as fast as possible with given parameters and output data, and compute how much time it could took in real time
 [] - simulation controls in main frame (schematic frame)
+[] - implement step operation of the simulation
+[i] - change tabs layout and appearance (move to center, change style)
+[d] - add settings button on the end of notebook object (tabs)
