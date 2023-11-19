@@ -1,7 +1,5 @@
-from os import abort
-
 if __name__ == "__main__":
-    abort()
+    exit(-1)
 
 window_width = 800
 window_height = 500
