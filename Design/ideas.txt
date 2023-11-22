@@ -6,4 +6,4 @@
 [] - simulation controls in main frame (schematic frame)
 [] - implement step operation of the simulation
 [i] - change tabs layout and appearance (move to center, change style)
-[d] - add settings button on the end of notebook object (tabs)
+[-] - add settings button on the end of notebook object (tabs) [no settings needed]

@@ -19,11 +19,17 @@ class MainWindow(tk.Tk):
     def __drawmain__(self):
         self.style = ttk.Style()
         self.style.theme_use('clam')
+        #self.style.configure("frames_notebook.TNotebook", tabposition='n', tabmargins=(2, 5, 2, 0))
+        #self.style.configure("frames_notebook.TNotebook.Tab", padding=(20, 10))
                   
-        #self.style.theme_settings(self.style.theme_use(),
-        #                        settings={
-        #"TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0] } },
-        #"TNotebook.Tab": {"configure": {"padding": [20, 10] },}})
+        self.style.theme_settings(self.style.theme_use(), {
+            "frames_notebook.TNotebook": {
+                "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
+            },
+            "frames_notebook.TNotebook.Tab": {
+                "configure": {"padding": (20, 10)},
+            }
+                                })
         
         self.title("Tea Brewing Simulator")
         self.geometry(f"{constants.window_width}x{constants.window_height}+"
@@ -33,12 +39,13 @@ class MainWindow(tk.Tk):
 
         self.grid()
 
-        self.notebook = ttk.Notebook(self, takefocus=False, width=constants.window_width, height=constants.window_height)
+        self.notebook = ttk.Notebook(self, takefocus=False, width=constants.window_width, height=constants.window_height, style="frames_notebook.TNotebook")
         self.notebook.grid(column=0, row=0)
 
         self.notebook_frames = []
         for win_frame in sim_frames:
             frame = win_frame(parent=self)
+            frame.grid(sticky=tk.NSEW)
             self.notebook.add(frame, text=frame.name)
             self.notebook_frames.append(frame)
             
@@ -95,15 +102,7 @@ class ControlFrame(tk.Frame):
         # self.content_update()
 
     def create_ui(self):
-        self.button = ttk.Button(self, text="switch theme", command=self.change_theme)
-        self.button.grid(column=0, row=1)
-        self.label = ttk.Label(self, text=self.parent.style.theme_use())
-        self.label.grid(column=1, row=1)
-
-    def change_theme(self):
-        selected_style = self.parent.style.theme_names().index(self.parent.style.theme_use())
-        self.parent.style.theme_use(self.parent.style.theme_names()[selected_style + 1 if selected_style < len(self.parent.style.theme_names()) - 1 else 0])
-        self.label.config(text=self.parent.style.theme_use())
+        pass
 
     def content_update(self):
         pass
