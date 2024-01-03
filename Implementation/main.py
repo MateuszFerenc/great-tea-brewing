@@ -152,3 +152,6 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 if __name__ == "__main__":
     main = MainWindow()
     main.mainloop()
+
+
+    dupa 
