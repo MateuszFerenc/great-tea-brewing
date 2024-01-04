@@ -31,10 +31,12 @@ class MainWindow(tk.Tk):
             "frames_notebook.TNotebook": {
                 "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
             },
-            "frames_notebook.TNotebook.Tab": {
-                "configure": {"padding": (20, 10)},
-            }
-                                })
+              "frames_notebook.TNotebook.Tab": {
+                "configure": {"padding": [10, 5]},
+                "map":       {
+                "padding": [("selected", [20,10])] 
+                }
+            }})
         
         self.title("Tea Brewing Simulator")
         self.geometry(f"{constants.window_width}x{constants.window_height}+"
@@ -63,16 +65,43 @@ class SimulationFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        self.label = ttk.Label(self, text="Tab 0")
-        self.label.grid(column=0, row=0)
-        # self.create_ui()
-        # self.content_update()
+        #label = ttk.Label(self, text="Tab 0")
+        #label.grid(column=0, row=0)
+        
+        self.create_ui()
+        self.content_update()
 
     def create_ui(self):
-        pass
+
+        #button_position = ttk.Label(self)
+        #button_position.grid(column=0, row=1, columnspan=4, pady=50)
+
+        start_button = ttk.Button(self, text="Start", command=self.start)
+        start_button.grid(column=0, row=1, padx=55, pady=400)
+
+        stop_button = ttk.Button(self, text="Stop", command=self.stop)
+        stop_button.grid(column=1, row=1, padx=55, pady=0)
+
+        restart_button = ttk.Button(self, text="Restart", command=self.restart)
+        restart_button.grid(column=2, row=1, padx=55, pady=0)
+
+        rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
+        rewind_button.grid(column=3, row=1, padx=55, pady=0)
 
     def content_update(self):
         pass
+
+    def start(self):
+        print("Start")
+
+    def stop(self):
+        print("Stop")
+
+    def restart(self):
+        print("Restart")
+
+    def rewind(self):
+        print("Rewind")
 
 class InputsFrame(tk.Frame):
     def __init__(self, parent):
@@ -82,8 +111,31 @@ class InputsFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        label = ttk.Label(self, text="Tab 1")
-        label.grid(column=0, row=0)
+        #label = ttk.Label(self, text="water level: ")
+        #label.grid(column=0, row=0)
+
+        #self.input_entry = ttk.Entry(self)
+        #self.input_entry.grid(column=1, row=0)
+
+        #label2 = ttk.Label(self, text="temperature: ")
+        #label2.grid(column=0, row=0)
+
+        #self.input_entry2 = ttk.Entry(self)
+        #self.input_entry2.grid(column=1, row=0)
+
+        water_level_label = ttk.Label(self, text="Water Level:")
+        water_level_label.grid(column=0, row=0, padx=(0, 5))
+
+        self.water_level_entry = ttk.Entry(self)
+        self.water_level_entry.grid(column=1, row=0)
+
+        # Temperature label and input field
+        temperature_label = ttk.Label(self, text="Temperature:")
+        temperature_label.grid(column=0, row=1, padx=(0, 5), pady=(10, 0))
+
+        self.temperature_entry = ttk.Entry(self)
+        self.temperature_entry.grid(column=1, row=1)
+
         # self.create_ui()
         # self.content_update()
 
@@ -120,10 +172,21 @@ class OutputsFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        label = ttk.Label(self, text="Tab 3")
-        label.grid(column=0, row=0)
+        #label = ttk.Label(self, text="Tab 3")
+        #label.grid(column=0, row=0)
         # self.create_ui()
         # self.content_update()
+
+        parameter1_label = ttk.Label(self, text="Parameter 1: ")
+        parameter1_label.grid(column=0, row=0, padx=(0, 5), pady=5)
+
+        #tu będą wartości i jednostki 
+
+        parameter2_label = ttk.Label(self, text="Parameter 2: ")
+        parameter2_label.grid(column=0, row=1, padx=(0, 5), pady=5)
+
+        parameter3_label = ttk.Label(self, text="Parameter 3: ")
+        parameter3_label.grid(column=0, row=2, padx=(0, 5), pady=5)
 
     def create_ui(self):
         pass
