@@ -28,10 +28,12 @@ class MainWindow(tk.Tk):
             "frames_notebook.TNotebook": {
                 "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
             },
-            "frames_notebook.TNotebook.Tab": {
-                "configure": {"padding": (20, 10)},
-            }
-                                })
+              "frames_notebook.TNotebook.Tab": {
+                "configure": {"padding": [10, 5]},
+                "map":       {
+                "padding": [("selected", [20,10])] 
+                }
+            }})
         
         self.title("Tea Brewing Simulator")
         self.geometry(f"{constants.window_width}x{constants.window_height}+"
