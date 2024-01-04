@@ -1,7 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import constants
-import types
 import re
 from threading import Thread
 from time import sleep
@@ -16,14 +15,18 @@ def get_center(parent, axis, val):
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        self.alive = True
         self.__drawmain__()
+
+    def on_closing(self):
+        self.alive = False
+        self.destroy()
 
     def __drawmain__(self):
         self.style = ttk.Style()
         self.style.theme_use('clam')
-        #self.style.configure("frames_notebook.TNotebook", tabposition='n', tabmargins=(2, 5, 2, 0))
-        #self.style.configure("frames_notebook.TNotebook.Tab", padding=(20, 10))
-                  
+
         self.style.theme_settings(self.style.theme_use(), {
             "frames_notebook.TNotebook": {
                 "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
@@ -151,11 +154,17 @@ class GraphsFrame(tk.Frame):
 sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match('.*Frame$', c))
 # create list of class types defined in this scope
 
+simulation_sampling_rate = constants.simulation_default_sampling
+
 def logic_thread(root):
-    for i in range(100):
-        print(i)
-        sleep(0.1)
-        root.notebook_frames[0].label.configure(text=i)
+    simulation_counter = 0
+    while 1:
+        if ( simulation_counter >= 1000/simulation_sampling_rate):
+            print("One sample")
+            simulation_counter = 0
+        sleep(constants.simulation_tick/1000)
+        simulation_counter += constants.simulation_tick
+        root.notebook_frames[0].label.configure(text=simulation_counter)
         
 
 if __name__ == "__main__":
@@ -163,4 +172,3 @@ if __name__ == "__main__":
     secondary_thread = Thread(target=logic_thread, daemon=True, args=(main,))
     secondary_thread.start()
     main.mainloop()
-    secondary_thread.join()
