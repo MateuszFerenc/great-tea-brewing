@@ -3,6 +3,8 @@ import tkinter.ttk as ttk
 import constants
 import types
 import re
+from threading import Thread
+from time import sleep
 
 
 def get_center(parent, axis, val):
@@ -58,8 +60,8 @@ class SimulationFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        label = ttk.Label(self, text="Tab 0")
-        label.grid(column=0, row=0)
+        self.label = ttk.Label(self, text="Tab 0")
+        self.label.grid(column=0, row=0)
         # self.create_ui()
         # self.content_update()
 
@@ -149,6 +151,16 @@ class GraphsFrame(tk.Frame):
 sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match('.*Frame$', c))
 # create list of class types defined in this scope
 
+def logic_thread(root):
+    for i in range(100):
+        print(i)
+        sleep(0.1)
+        root.notebook_frames[0].label.configure(text=i)
+        
+
 if __name__ == "__main__":
     main = MainWindow()
+    secondary_thread = Thread(target=logic_thread, daemon=True, args=(main,))
+    secondary_thread.start()
     main.mainloop()
+    secondary_thread.join()
