@@ -227,7 +227,7 @@ def logic_thread(root):
             simulation_counter = 0
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
-        root.notebook_frames[0].label.configure(text=simulation_counter)
+        #root.notebook_frames[0].label.configure(text=simulation_counter)
         
 
 if __name__ == "__main__":
