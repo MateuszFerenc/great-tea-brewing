@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+import functions
 import constants
 import re
 from threading import Thread
@@ -221,12 +222,17 @@ simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
     simulation_counter = 0
+    counter = 0
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
+            functions.heatingUpWater(counter)
+            counter += 1
+            print (counter, " ")
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
+        
         #root.notebook_frames[0].label.configure(text=simulation_counter)
         
 
