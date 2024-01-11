@@ -5,6 +5,9 @@ import constants
 import re
 from threading import Thread
 from time import sleep
+from PIL import Image, ImageTk
+import os
+from pathlib import Path
 
 
 def get_center(parent, axis, val):
@@ -72,22 +75,82 @@ class SimulationFrame(tk.Frame):
         self.create_ui()
         self.content_update()
 
+
     def create_ui(self):
+
+        self.image_placeholder = tk.PhotoImage(width=50, height=50)
+
+        image_label = ttk.Label(self, image=self.image_placeholder)
+        image_label.grid(column=0, row=0, columnspan=4, pady=10)
+        image_label.place(x=670, y=350, anchor="center")
+
+        im0 = Image.open('0.png')
+        #im1 = Image.open('1.png')
+        #im2 = Image.open('2.png')
+        #im3 = Image.open('3.png')
+        im0 = im0.resize((750, 600))
+        #im1 = im1.resize((750, 600))
+        #im2 = im2.resize((750, 600))
+        #im3 = im.resize((750, 600))
+
+        self.image_placeholder = ImageTk.PhotoImage(im0)
+        #self.image_placeholder = ImageTk.PhotoImage(im1)
+        #self.image_placeholder = ImageTk.PhotoImage(im2)
+
+        image_label['image'] = self.image_placeholder
+
+
+
+        #self.image_placeholder = tk.PhotoImage(width=50, height=50)
+
+        #image_label = ttk.Label(self, image=self.image_placeholder)
+        #image_label.grid(column=0, row=0, columnspan=4, pady=10)
+
+        #im = Image.open('hui.png')
+
+        #self.image_placeholder.image = ImageTk.PhotoImage(im)
+        #self.image_placeholder.config(image=self.image_placeholder.image)
+
+
+
+        #win=Tk()
+        #image_placeholder = tk.PhotoImage(width=50, height=50)  # Adjust width and height accordingly
+        #image_label = ttk.Label(self, image=image_placeholder)
+        #image_label.grid(column=0, row=0, columnspan=4, pady=10)
+        #parent = tk.Tk()
+        #parent.title("Image in Tkinter")
+        #tk_image = ImageTk.PhotoImage(image)
+
+        #Load and display an image 
+        #(replace 'your_logo.png' with the path to your image file)
+        #im = Image.open('hui.png')
+
+        #Create a label to display the image
+        #image_label = tk.Label(parent, image=image)
+        #image_label.pack()
+        #bg = ImageTk.PhotoImage(file="placeholder.svg")
+        #label=Label(win, image=bg)
+        #label.place(x=0, y=0)
 
         #button_position = ttk.Label(self)
         #button_position.grid(column=0, row=1, columnspan=4, pady=50)
 
         start_button = ttk.Button(self, text="Start", command=self.start)
-        start_button.grid(column=0, row=1, padx=55, pady=400)
+        start_button.grid(column=0, row=1, padx=130, pady=670)
 
         stop_button = ttk.Button(self, text="Stop", command=self.stop)
-        stop_button.grid(column=1, row=1, padx=55, pady=0)
+        stop_button.grid(column=1, row=1, padx=130, pady=0)
 
         restart_button = ttk.Button(self, text="Restart", command=self.restart)
-        restart_button.grid(column=2, row=1, padx=55, pady=0)
+        restart_button.grid(column=2, row=1, padx=130, pady=0)
 
         rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
-        rewind_button.grid(column=3, row=1, padx=55, pady=0)
+        rewind_button.grid(column=3, row=1, padx=130, pady=0)
+
+
+
+    def start(self):
+        print(self.image_path_1.get())
 
     def content_update(self):
         pass
@@ -118,25 +181,37 @@ class InputsFrame(tk.Frame):
         #self.input_entry = ttk.Entry(self)
         #self.input_entry.grid(column=1, row=0)
 
-        #label2 = ttk.Label(self, text="temperature: ")
+        #label2 = ttk.Label(self, text="heater_temperature: ")
         #label2.grid(column=0, row=0)
 
         #self.input_entry2 = ttk.Entry(self)
         #self.input_entry2.grid(column=1, row=0)
 
-        water_level_label = ttk.Label(self, text="Water Level:")
-        water_level_label.grid(column=0, row=0, padx=(0, 5))
+        # input label field
+        input_label = ttk.Label(self, text="Input: ")
+        input_label.grid(column=0, row=0, padx=(0, 5))
 
-        self.water_level_entry = ttk.Entry(self)
-        self.water_level_entry.grid(column=1, row=0)
+        self.input_entry = ttk.Entry(self)
+        self.input_entry.grid(column=1, row=0)
 
-        # Temperature label and input field
-        temperature_label = ttk.Label(self, text="Temperature:")
-        temperature_label.grid(column=0, row=1, padx=(0, 5), pady=(10, 0))
+        # output label field
+        output_label = ttk.Label(self, text="Output: ")
+        output_label.grid(column=0, row=1, padx=(0, 5), pady=(10, 0))
+        
+        self.output_entry = ttk.Entry(self)
+        self.output_entry.grid(column=1, row=1)
 
-        self.temperature_entry = ttk.Entry(self)
-        self.temperature_entry.grid(column=1, row=1)
+        self.input_entry = ttk.Entry(self)
+        self.input_entry.grid(column=1, row=0)
 
+        # heater_temperature label field
+        heater_temperature_label = ttk.Label(self, text="Heater temperature: ")
+        heater_temperature_label.grid(column=0, row=2, padx=(0, 5), pady=(10, 0))
+
+        self.heater_temperature_entry = ttk.Entry(self)
+        self.heater_temperature_entry.grid(column=1, row=2)
+
+        
         # self.create_ui()
         # self.content_update()
 
@@ -178,16 +253,28 @@ class OutputsFrame(tk.Frame):
         # self.create_ui()
         # self.content_update()
 
-        parameter1_label = ttk.Label(self, text="Parameter 1: ")
-        parameter1_label.grid(column=0, row=0, padx=(0, 5), pady=5)
-
         #tu będą wartości i jednostki 
 
-        parameter2_label = ttk.Label(self, text="Parameter 2: ")
-        parameter2_label.grid(column=0, row=1, padx=(0, 5), pady=5)
+        current_temperature_label = ttk.Label(self, text="Current temperature: ")
+        current_temperature_label.grid(column=0, row=0, padx=(0, 5), pady=5)
 
-        parameter3_label = ttk.Label(self, text="Parameter 3: ")
-        parameter3_label.grid(column=0, row=2, padx=(0, 5), pady=5)
+        self.current_temperature = ttk.Entry(self)
+        self.current_temperature.grid(column=1, row=0)
+
+        #def tmp():
+        #    current_temperature_label.config(text=str(data.get()))
+
+        current_temperature_changes_label = ttk.Label(self, text="Current temperature changes: ")
+        current_temperature_changes_label.grid(column=0, row=1, padx=(0, 5), pady=5)
+
+        self.current_temperature_changes = ttk.Entry(self)
+        self.current_temperature_changes.grid(column=1, row=1)
+
+        water_level_label = ttk.Label(self, text="Water level: ")
+        water_level_label.grid(column=0, row=2, padx=(0, 5), pady=5)
+
+        self.water_level = ttk.Entry(self)
+        self.water_level.grid(column=1, row=2)
 
     def create_ui(self):
         pass
