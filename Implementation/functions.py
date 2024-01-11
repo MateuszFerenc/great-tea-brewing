@@ -1,35 +1,45 @@
 import math
-import main
-volume = 100 #litry
-B = 0.035 #beta
-h_min = 0.0
-h_max = 5.0
-t_sim = 3600.0 #simulation time
-sample_Time = 0.1
-N = int(t_sim/sample_Time) + 1
-t = [0.0]
-Q_d = [0.05]
-h = [0.0]
-Q_o = [B * h[-1] ** 0.5]
-m = 0.998 * volume #masa wody w naczyniu
-c = 4200 # ciepło właściwe wody
-q = 100 / sample_Time
-heating_Time = [0.0]
-temp = [20.0]
-temp_Max = 100
-temp_Min = 1
-
-def pouringWater():
-    t.append(t[-1] + sample_Time)
-    Q_d.append(Q_d[-1])
-    h.append(min(max(sample_Time * (Q_d[-1] - Q_o[-1]) /volume + h[-1], h_min), h_max))
-    Q_o.append(B * math.sqrt(h[-1]))
 
 
-def heatingUpWater(counter):
-    heating_Time.append(heating_Time[-1] + sample_Time)
-    temp.append(min(max(((((q/(m*c))+temp[-1]))), temp_Min), temp_Max))
-    print(temp[counter], " ")
+class Functions:
+    def __init__(self, sample_time, initial_volume):
+        self.volume = initial_volume #volume of boiler [liters]
+        self.B = 0.035 #beta
+        self.h_min = 0.0
+        self.h_max = 5.0
+        self.sample_time = sample_time / 1000
+        self.t = [0.0]
+        self.Q_d = [0.05]
+        self.h = [0.0] #amount of water in boiler [liters]
+        self.Q_o = [self.B * self.h[-1] ** 0.5]
+        self.m = 0.998 * self.h[-1] #current water mass in boiler [kgs]
+        self.c = 4200 # specific heat of water
+        self.p = 1500
+        self.heating_time = [0.0]
+        self.temp = [20.00]
+        self.temp_Max = 100
+        self.temp_Min = 1
+
+    def pouringinitialize(self, initial_h, Q_d, Q_o):
+        self.h = initial_h
+        self.Q_d = Q_d
+        self.Q_o = Q_o
+
+    def heatinginitialize(self, initial_temperature, heater_power):
+        self.temp = initial_temperature
+        self.p = heater_power
+        self.heating_time = [0.0]
+
+    def pouringwater(self):
+        self.t.append(self.t[-1] + self.sample_time)
+        self.Q_d.append(self.Q_d[-1])
+        self.h.append(min(max(self.sample_time * (self.Q_d[-1] - self.Q_o[-1]) / self.volume + self.h[-1], self.h_min), self.h_max))
+        self.Q_o.append(self.B * math.sqrt(self.h[-1]))
+
+    def heatingupwater(self, counter):
+        self.heating_time.append(self.heating_time[-1] + self.sample_time)
+        self.temp.append(min(max(((((self.p/(self.m*(self.c/self.sample_time)))+self.temp[-1]))), self.temp_Min), self.temp_Max))
+        print(self.temp[counter], " ")
 
 
 
