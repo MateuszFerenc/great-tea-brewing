@@ -7,6 +7,13 @@ from threading import Thread
 from time import sleep
 
 
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib
+matplotlib.use("TkAgg")
+
+
 def get_center(parent, axis, val):
     assert axis in ['x', 'y']
     ax = {"x": parent.winfo_screenwidth(), "y": parent.winfo_screenheight()}
@@ -73,6 +80,18 @@ class SimulationFrame(tk.Frame):
         self.content_update()
 
     def create_ui(self):
+
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.fig.subplots()
+        self.ax.set_xlabel("time [s]")
+        self.ax.set_ylabel("T [Celsius]")
+        self.line, = self.ax.plot([], [])
+        self.ax.set_ylim((0, 125))
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)  # A tk.DrawingArea.
+        self.canvas.draw()
+
+        self.canvas.get_tk_widget().grid(column=0, row=0)
 
         #button_position = ttk.Label(self)
         #button_position.grid(column=0, row=1, columnspan=4, pady=50)
@@ -223,13 +242,23 @@ simulation_sampling_rate = constants.simulation_default_sampling
 def logic_thread(root):
     simulation_counter = 0
     counter = 0
+    #lista = [25]
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
             functions.heatingUpWater(counter)
+            #lista.append(25+counter%5)
+
+            root.notebook_frames[0].ax.clear()
+            #root.notebook_frames[0].ax.plot(functions.heating_Time, lista, color="r")
+            root.notebook_frames[0].ax.plot(functions.heating_Time, functions.temp, color="r")
+            root.notebook_frames[0].ax.set_ylim((0, 125))
+
+            root.notebook_frames[0].canvas.draw()
             counter += 1
-            print (counter, " ")
+
+
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
         
