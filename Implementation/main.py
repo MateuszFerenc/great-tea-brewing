@@ -5,6 +5,7 @@ import constants
 import re
 from threading import Thread
 from time import sleep
+import functions
 
 
 
@@ -276,17 +277,17 @@ simulation_sampling_rate = constants.simulation_default_sampling
 def logic_thread(root):
     simulation_counter = 0
     counter = 0
-    #lista = [25]
+    operators = functions.Functions(simulation_sampling_rate, 100)
+    operators.heatinginitialize(10, 100)
+    operators.pouringinitialize(1, 0, 0)
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
-            functions.heatingUpWater(counter)
-            #lista.append(25+counter%5)
+            operators.heatingupwater(counter)
 
             root.notebook_frames[0].ax.clear()
-            #root.notebook_frames[0].ax.plot(functions.heating_Time, lista, color="r")
-            root.notebook_frames[0].ax.plot(functions.heating_Time, functions.temp, color="r")
+            root.notebook_frames[0].ax.plot(operators.heating_time, operators.temp, color="r")
             root.notebook_frames[0].ax.set_ylim((0, 125))
 
             root.notebook_frames[0].canvas.draw()
@@ -295,8 +296,6 @@ def logic_thread(root):
 
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
-        
-        #root.notebook_frames[0].label.configure(text=simulation_counter)
         
 
 if __name__ == "__main__":
