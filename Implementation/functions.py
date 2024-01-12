@@ -1,35 +1,68 @@
 import math
-import main
-volume = 100 #litry
-B = 0.035 #beta
-h_min = 0.0
-h_max = 5.0
-t_sim = 3600.0 #simulation time
-sample_Time = 0.1
-N = int(t_sim/sample_Time) + 1
-t = [0.0]
-Q_d = [0.05]
-h = [0.0]
-Q_o = [B * h[-1] ** 0.5]
-m = 0.998 * volume #masa wody w naczyniu
-c = 4200 # ciepło właściwe wody
-q = 100 / sample_Time
-heating_Time = [0.0]
-temp = [20.0]
-temp_Max = 100
-temp_Min = 1
-
-def pouringWater():
-    t.append(t[-1] + sample_Time)
-    Q_d.append(Q_d[-1])
-    h.append(min(max(sample_Time * (Q_d[-1] - Q_o[-1]) /volume + h[-1], h_min), h_max))
-    Q_o.append(B * math.sqrt(h[-1]))
 
 
-def heatingUpWater(counter):
-    heating_Time.append(heating_Time[-1] + sample_Time)
-    temp.append(min(max(((((q/(m*c))+temp[-1]))), temp_Min), temp_Max))
-    print(temp[counter], " ")
+class Functions:
+    def __init__(self, sample_time: int, initial_volume: float, boiler_height: float = 0.1, bolier_width: float = 0.1, boiler_depth: float = 0.2):
+        assert type(sample_time) is int
+        assert sample_time > 0
+        assert initial_volume > 0
+
+        # fix pouring
+        self.B = 0.035 #beta
+        self.h_min = 0.0
+        self.h_max = 5.0
+        self.sample_time = round(sample_time / 1000, 4)
+        self.t = [0.0]
+        self.Q_d = [0.05]
+        #self.Q_o = [self.B * self.h[-1] ** 0.5]
+        #
+
+        self.c = 4200                                                       # specific heat of water [J/kg°C]
+        self.p = 1500                                                       # heating Wattage [W]
+        self.heating_time = 0.0
+        self.temp_Max = 105
+        self.temp_Min = 1
+        self.rho = 1000                                                     # water density [kg/m^3]
+        self.V = initial_volume / 1000                                      # inital water volume [m^3]
+        self.T_1 = 20                                                       # initial water temperature (°C)
+        self.T_env = 25                                                     # environment temperature [°C]
+        self.h = 10                                                         # heat transfer coefficient [W/m^2°C]
+        self.l = boiler_depth                                               # boiler depth [m]
+        self.w = bolier_width                                               # boiler width [m]
+        self.h = boiler_height                                              # boiler height [m]
+        self.A = 2 * (self.l * self.w + self.l * self.h + self.w * self.h)  # boiler maximum volume
+        self.samples = []
+        self.temperatures = []
+
+
+    def pouringinitialize(self, initial_volume, Q_d, Q_o):
+        self.V = initial_volume / 1000
+        self.Q_d = Q_d
+        self.Q_o = Q_o
+
+    def heatinginitialize(self, initial_temperature, heater_power):
+        self.T_1 = initial_temperature
+        self.p = heater_power
+        self.heating_time = 0.0
+        self.T_2 = self.T_1
+        self.m = self.rho * self.V
+
+    def pouringwater(self):
+        self.t.append(self.t[-1] + self.sample_time)
+        self.Q_d.append(self.Q_d[-1])
+        self.h.append(min(max(self.sample_time * (self.Q_d[-1] - self.Q_o[-1]) / self.volume + self.h[-1], self.h_min), self.h_max))
+        self.Q_o.append(self.B * math.sqrt(self.h[-1]))
+
+    def heatingupwater(self, sample_time):
+        self.Q = self.p * self.heating_time
+        self.Q_loss = self.h * self.A * (self.T_2 - self.T_env) * self.heating_time
+        self.samples.append(self.heating_time)
+        self.heating_time = round(self.heating_time + round(sample_time / 1000, 4), 4)
+        self.Q_net = self.Q - self.Q_loss
+        delta_T = self.Q_net / (self.c * self.m)
+        self.T_2 = self.T_1 + delta_T
+        self.temperatures.append(self.T_2)
+        #print(f"Po {self.heating_time} sekundach temperatura wody wynosi {self.T_2:.2f} °C") # wyświetlenie wyniku
 
 
 def heater_temperature():
