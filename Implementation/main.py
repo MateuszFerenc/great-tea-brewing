@@ -86,19 +86,6 @@ class SimulationFrame(tk.Frame):
 
 
     def create_ui(self):
-
-        self.fig = Figure(figsize=(5, 4), dpi=100)
-        self.ax = self.fig.subplots()
-        self.ax.set_xlabel("time [s]")
-        self.ax.set_ylabel("T [Celsius]")
-        self.line, = self.ax.plot([], [])
-        self.ax.set_ylim((0, 125))
-
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)  # A tk.DrawingArea.
-        self.canvas.draw()
-
-        self.canvas.get_tk_widget().grid(column=0, row=0)
-
         #button_position = ttk.Label(self)
         #button_position.grid(column=0, row=1, columnspan=4, pady=50)
 
@@ -257,13 +244,24 @@ class GraphsFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        label = ttk.Label(self, text="Tab 4")
-        label.grid(column=0, row=0)
-        # self.create_ui()
-        # self.content_update()
+        self.create_ui()
 
     def create_ui(self):
-        pass
+        dir_var = tk.Variable(value=("Test1", "Test2"))
+        graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE)
+        graphs_list.grid(column=0, row=0)
+
+        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.ax = self.fig.subplots()
+        self.ax.set_xlabel("time [s]")
+        self.ax.set_ylabel("T [Celsius]")
+        self.line, = self.ax.plot([], [])
+        self.ax.set_ylim((0, 125))
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)  # A tk.DrawingArea.
+        self.canvas.draw()
+
+        self.canvas.get_tk_widget().grid(column=1, row=0, columnspan=2)
 
     def content_update(self):
         pass
@@ -276,27 +274,33 @@ simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
     simulation_counter = 0
+    tick_counter = 0
     counter = 0
-    operators = functions.Functions(simulation_sampling_rate, 100)
-    operators.heatinginitialize(10, 2000)
+    operators = functions.Functions(simulation_sampling_rate, 1)
+    operators.heatinginitialize(20, 2500)
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
-            operators.heatingupwater()
-
-            root.notebook_frames[0].ax.clear()
-            root.notebook_frames[0].ax.plot(operators.samples, operators.temperatures, color="r")
-            root.notebook_frames[0].ax.set_ylim((0, 125))
-
-            root.notebook_frames[0].canvas.draw()
+            operators.heatingupwater(1000/simulation_sampling_rate)
+            
             counter += 1
 
+        if ( not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time):
+            root.notebook_frames[4].ax.clear()
+            root.notebook_frames[4].ax.plot(operators.samples, operators.temperatures, color="r")
+            root.notebook_frames[4].ax.set_ylim((0, 125))
+
+            root.notebook_frames[4].canvas.draw()
+
+        if ( tick_counter > 65000):
+            tick_counter = 0
 
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
+        tick_counter += 1
         
 
 if __name__ == "__main__":
