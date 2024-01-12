@@ -1,5 +1,5 @@
 import math
-
+from random import *
 
 class Functions:
     def __init__(self, sample_time: int, initial_volume: int):
@@ -16,7 +16,7 @@ class Functions:
         self.Q_d = [0.05]
         #self.Q_o = [self.B * self.h[-1] ** 0.5]
         self.c = 4200 # specific heat of water
-        self.p = 1500
+        self.actualpower = 1500
         self.heating_time = 0.0
         self.temp_Max = 100
         self.temp_Min = 1
@@ -52,12 +52,7 @@ class Functions:
         self.Q_o.append(self.B * math.sqrt(self.h[-1]))
 
     def heatingupwater(self):
-        #self.heating_time.append(self.heating_time[-1] + self.sample_time)
-        #print(f"self.p: {self.p}, self.m: {self.m}, self.c: {self.c}, self.sample_time: {self.sample_time}")
-        #self.temp.append(min(max((((((self.p/self.sample_time)/(self.m*self.c))+self.temp[-1]))), self.temp_Min), self.temp_Max))T_2 = T_1 # temperatura końcowa wody (°C)
-        #print(self.temp[counter], " ")
-
-        self.Q = self.p * self.heating_time # ciepło dostarczone przez grzałkę (J)
+        self.Q = self.actualpower * self.heating_time # ciepło dostarczone przez grzałkę (J)
         self.Q_loss = self.h * self.A * (self.T_2 - self.T_env) * self.heating_time # ciepło utracone przez ścianki czajnika (J)
         self.samples.append(self.heating_time)
         self.heating_time += self.sample_time
@@ -65,8 +60,8 @@ class Functions:
         delta_T = self.Q_net / (self.c * self.m) # zmiana temperatury wody (°C)
         self.T_2 = self.T_1 + delta_T # temperatura końcowa wody (°C)
         self.temperatures.append(self.T_2)
-        print(f"Po {self.heating_time} sekundach temperatura wody wynosi {self.T_2:.2f} °C") # wyświetlenie wyniku
 
-
-
-
+    def gettingpower(self, estimatedpower):
+        if self.actualpower < estimatedpower: self.actualpower += randint(10,30)
+        else : self.actualpower -= randint(10,30)
+        print(self.actualpower)
