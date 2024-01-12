@@ -42,12 +42,13 @@ class MainWindow(tk.Tk):
             "frames_notebook.TNotebook": {
                 "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
             },
-              "frames_notebook.TNotebook.Tab": {
+            "frames_notebook.TNotebook.Tab": {
                 "configure": {"padding": [10, 5]},
                 "map":       {
                 "padding": [("selected", [20,10])] 
                 }
-            }})
+            }
+            })
         
         self.title("Tea Brewing Simulator")
         self.geometry(f"{constants.window_width}x{constants.window_height}+"
@@ -186,33 +187,19 @@ class OutputsFrame(tk.Frame):
         self.parent = parent
         self.grid()
 
-        #label = ttk.Label(self, text="Tab 3")
-        #label.grid(column=0, row=0)
-        # self.create_ui()
-        # self.content_update()
-
         #tu będą wartości i jednostki 
 
-        current_temperature_label = ttk.Label(self, text="Current temperature: ")
-        current_temperature_label.grid(column=0, row=0, padx=(0, 5), pady=5)
+        self.current_temperature_label = ttk.Label(self, text="Current temperature: ")
+        self.current_temperature_label.grid(column=0, row=0, padx=(0, 5), pady=5)
 
-        self.current_temperature = ttk.Entry(self)
-        self.current_temperature.grid(column=1, row=0)
 
-        #def tmp():
-        #    current_temperature_label.config(text=str(data.get()))
+        self.current_temperature_changes_label = ttk.Label(self, text="Current temperature changes: ")
+        self.current_temperature_changes_label.grid(column=0, row=1, padx=(0, 5), pady=5)
 
-        current_temperature_changes_label = ttk.Label(self, text="Current temperature changes: ")
-        current_temperature_changes_label.grid(column=0, row=1, padx=(0, 5), pady=5)
 
-        self.current_temperature_changes = ttk.Entry(self)
-        self.current_temperature_changes.grid(column=1, row=1)
+        self.water_level_label = ttk.Label(self, text="Water level: ")
+        self.water_level_label.grid(column=0, row=2, padx=(0, 5), pady=5)
 
-        water_level_label = ttk.Label(self, text="Water level: ")
-        water_level_label.grid(column=0, row=2, padx=(0, 5), pady=5)
-
-        self.water_level = ttk.Entry(self)
-        self.water_level.grid(column=1, row=2)
 
     def create_ui(self):
         pass
@@ -273,7 +260,10 @@ def logic_thread(root):
             simulation_counter = 0
             operators.heatingupwater()
             operators.gettingpower(root.notebook_frames[1].my_scale.get())
-            scale_sample.append(root.notebook_frames[1].my_scale.get())
+            scale_sample.append(root.notebook_frames[1].my_scale.get())   
+
+            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.T_2} °C")
+            root.notebook_frames[2].water_level_label.configure(text=f"Water level: {operators.V} m^3")
             counter += 1
 
         if ( tick_counter > 65000):
@@ -282,7 +272,6 @@ def logic_thread(root):
         # check if a other graph was selected, if so change displayed graph
         graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0]
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
-            #print(root.notebook_frames[4].graphs_list.get(graph_select_new))
             if root.notebook_frames[3].graphs_list.get(graph_select_new) == "Water Temperature":
                 display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.temperatures)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == "Heater Power":

@@ -57,10 +57,9 @@ class Functions:
         self.heating_time = round(self.heating_time + self.sample_time, 4)
         self.Q_net = self.Q - self.Q_loss
         delta_T = self.Q_net / (self.c * self.m)
-        self.T_2 = self.T_1 + delta_T
+        self.T_2 = self.T_1 + round(delta_T, 2)
         self.temperatures.append(self.T_2)
 
     def gettingpower(self, estimatedpower):
         if self.actualpower < estimatedpower: self.actualpower += randint(50,150)
         else : self.actualpower -= randint(50,150)
-        print(self.actualpower)
