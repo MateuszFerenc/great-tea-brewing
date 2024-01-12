@@ -17,11 +17,11 @@ class Functions:
         self.c = 4200 # specific heat of water
         self.actualpower = 5000
         self.heating_time = 0.0
-        self.temp_Max = 105
+        self.T_1 = 20
+        self.temp_Max = 100
         self.temp_Min = 1
         self.rho = 1000                                                     # water density [kg/m^3]
-        self.V = initial_volume / 1000                                      # inital water volume [m^3]
-        self.T_1 = 20                                                       # initial water temperature (°C)
+        self.V = initial_volume / 1000                                      # inital water volume [m^3]                                                       # initial water temperature (°C)
         self.T_env = 25                                                     # environment temperature [°C]
         self.h = 10                                                         # heat transfer coefficient [W/m^2°C]
         self.l = boiler_depth                                               # boiler depth [m]
@@ -44,7 +44,7 @@ class Functions:
         self.T_2 = self.T_1
         self.m = self.rho * self.V
 
-    def pouringwater(self):
+    def pouringwater(self): #w sumie jak patrzyłem to wzór jest mniej więcej w porządku, h to dla nas V po prostu :)
         self.t.append(self.t[-1] + self.sample_time)
         self.Q_d.append(self.Q_d[-1])
         self.h.append(min(max(self.sample_time * (self.Q_d[-1] - self.Q_o[-1]) / self.volume + self.h[-1], self.h_min), self.h_max))
@@ -58,8 +58,11 @@ class Functions:
         self.Q_net = self.Q - self.Q_loss
         delta_T = self.Q_net / (self.c * self.m)
         self.T_2 = self.T_1 + round(delta_T, 2)
-        self.temperatures.append(self.T_2)
+        self.temperatures.append(min(max(self.T_2, self.temp_Min), self.temp_Max))
+        #jest jakiś problem z tymi wzorami, bo ta grzałka jak damy na 10000 to wywala dość mocno, 
+        #a potem ta tempertura nie pozostaje na swoim miejscu :/
 
     def gettingpower(self, estimatedpower):
         if self.actualpower < estimatedpower: self.actualpower += randint(50,150)
         else : self.actualpower -= randint(50,150)
+

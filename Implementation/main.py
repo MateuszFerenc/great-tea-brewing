@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import ttk
 import functions
 import constants
 import re
@@ -76,6 +77,7 @@ class SimulationFrame(tk.Frame):
         self.long_name = "SimulationFrame"
         self.parent = parent
         self.grid()
+        self.guard = None
 
         #label = ttk.Label(self, text="Tab 0")
         #label.grid(column=0, row=0)
@@ -86,18 +88,50 @@ class SimulationFrame(tk.Frame):
 
     def create_ui(self):
 
-        self.image_placeholder = tk.PhotoImage(width=50, height=50)
+        #if self.guard == image_paths: 
+        #   return
+        #self.guard = image_paths
 
-        image_label = ttk.Label(self, image=self.image_placeholder)
-        image_label.grid(column=0, row=0, columnspan=4, pady=10)
-        image_label.place(x=670, y=350, anchor="center")
+        ### UDAŁO MI SIĘ TO ZROBIĆ, ALE MAM PROBLEM Z WRZUCANIEM NAZW PLIKÓW DO ZMIENNYCH... CIĄGLE COŚ :( 
+        ###Jakby co to mam sposób na ogarnięcie tego w sposób łopatologiczny aby działał, ale nie jestem z niego zadowolony, 
+        ##tak więc w ostateczności możemy z niego skorzystać
 
-        im0 = Image.open('0.png')
-        im0 = im0.resize((750, 600))
+        # Load images
+        self.image1 = tk.StringVar()
+        self.image2 = tk.StringVar()
+        self.image3 = tk.StringVar()
+        self.image4 = tk.StringVar()
+        self.image1 = '0.png'
+        self.image2 = '1.png'
+        self.image3 = '2.png'
+        self.image4 = '3.png'
 
-        self.image_placeholder = ImageTk.PhotoImage(im0)
 
-        image_label['image'] = self.image_placeholder
+
+        self.image_paths = [self.image1, self.image2, self.image3, self.image4]
+
+
+        self.images = [Image.open(path) for path in self.image_paths]
+
+        # Resize images to the same dimensions
+        width, height = 600, 600
+        self.images = [img.resize((width, height), Image.LANCZOS) for img in self.images]
+
+        # Create an empty image with an alpha channel
+        self.result_image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+
+        # Paste images onto the result image, considering alpha channel
+        positions = [(0, 0), (0, 0), (0, 0), (0, 0)]
+        for img, pos in zip(self.images, positions):
+            self.result_image.paste(img, pos, img)
+
+        # # Convert the result to Tkinter PhotoImage
+        self.tk_image = ImageTk.PhotoImage(self.result_image)
+
+        # Create label to display the overlaid image
+        self.display = ttk.Label(self, image=self.tk_image)
+        self.display.grid(row=0, column=0, padx=5, pady=5)
+
 
         start_button = ttk.Button(self, text="Start", command=self.start)
         start_button.grid(column=0, row=1, padx=130, pady=670)
@@ -163,11 +197,23 @@ class InputsFrame(tk.Frame):
         self.heater_temperature_entry = ttk.Entry(self)
         self.heater_temperature_entry.grid(column=1, row=2)
 
-        # Slider code
+        #Power slider
         heater_power_label = ttk.Label(self, text="Heating power: ")
         heater_power_label.grid(column=0, row=4, padx=(0, 5), pady=(20, 0))
         self.my_scale=tk.Scale(self, orient="horizontal",cursor="dot", from_=500, to= 10000, length = 400, resolution = 100)
         self.my_scale.grid(column=1, row=4, padx=0, pady=0)
+
+        # Water-in slider
+        water_in_label = ttk.Label(self, text="Pouring water in level: ")
+        water_in_label.grid(column=0, row=5, padx=(0, 5), pady=(20, 0))
+        self.water_in=tk.Scale(self, orient="horizontal",cursor="dot", from_=500, to= 10000, length = 400, resolution = 100)
+        self.water_in.grid(column=1, row=5, padx=0, pady=0)
+
+        # Water-out slider
+        water_out_label = ttk.Label(self, text="Pouring water out level: ")
+        water_out_label.grid(column=0, row=6, padx=(0, 5), pady=(20, 0))
+        self.water_out=tk.Scale(self, orient="horizontal",cursor="dot", from_=500, to= 10000, length = 400, resolution = 100)
+        self.water_out.grid(column=1, row=6, padx=0, pady=0)
 
 
         self.create_ui()
@@ -257,12 +303,13 @@ def logic_thread(root):
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
+            #root.notebook_frames[0].create_ui(image_paths) #sposób łopatologiczny niezadawalający
             simulation_counter = 0
             operators.heatingupwater()
             operators.gettingpower(root.notebook_frames[1].my_scale.get())
             scale_sample.append(root.notebook_frames[1].my_scale.get())   
-
-            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.T_2} °C")
+            #adding labels with current temperature and water level
+            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.temperatures[-1]} °C") #zmieniłem zmienną bo nie działało ograniczenie na 100*C i leciało to do góry
             root.notebook_frames[2].water_level_label.configure(text=f"Water level: {operators.V} m^3")
             counter += 1
 
@@ -304,9 +351,16 @@ def display_heater_power_graph(root, x_vals, y_vals):
     #root.ax.legend()
     root.canvas.draw()
 
+def display_image(root, image1, image2, image3, image4):#funkcja do podmiany zdjęć ale nie działa, część usunąłem
+    root.image1.set(image1)
+    root.image2.set(image2)
+    root.image3.set(image3)
+    root.image4.set(image4)
+    
 
 if __name__ == "__main__":
     main = MainWindow()
     secondary_thread = Thread(target=logic_thread, daemon=True, args=(main,))
     secondary_thread.start()
     main.mainloop()
+
