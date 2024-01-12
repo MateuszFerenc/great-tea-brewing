@@ -247,18 +247,17 @@ class GraphsFrame(tk.Frame):
         self.create_ui()
 
     def create_ui(self):
-        dir_var = tk.Variable(value=("Test1", "Test2"))
-        graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE)
-        graphs_list.grid(column=0, row=0)
+        dir_var = tk.Variable(value=constants.plot_names)
+        self.graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE)
+        self.graphs_list.grid(column=0, row=0)
+        self.graphs_list.select_set(0)
 
         self.fig = Figure(figsize=(5, 4), dpi=100)
         self.ax = self.fig.subplots()
-        self.ax.set_xlabel("time [s]")
-        self.ax.set_ylabel("T [Celsius]")
         self.line, = self.ax.plot([], [])
-        self.ax.set_ylim((0, 125))
+        self.ax.set_ylim((0, 1))
 
-        self.canvas = FigureCanvasTkAgg(self.fig, master=self)  # A tk.DrawingArea.
+        self.canvas = FigureCanvasTkAgg(self.fig, master=self)
         self.canvas.draw()
 
         self.canvas.get_tk_widget().grid(column=1, row=0, columnspan=2)
@@ -276,32 +275,58 @@ def logic_thread(root):
     simulation_counter = 0
     tick_counter = 0
     counter = 0
+    graph_select_old, graph_select_new = root.notebook_frames[4].graphs_list.curselection()[0], root.notebook_frames[4].graphs_list.curselection()[0]
     operators = functions.Functions(simulation_sampling_rate, 1)
     operators.heatinginitialize(20, 2500)
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
-            print("One sample")
+            #print("One sample")
             simulation_counter = 0
             operators.heatingupwater(1000/simulation_sampling_rate)
             
-            counter += 1
-
-        if ( not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time):
-            root.notebook_frames[4].ax.clear()
-            root.notebook_frames[4].ax.plot(operators.samples, operators.temperatures, color="r")
-            root.notebook_frames[4].ax.set_ylim((0, 125))
-
-            root.notebook_frames[4].canvas.draw()
+            counter += 1    
 
         if ( tick_counter > 65000):
             tick_counter = 0
+
+        # check if a other graph was selected, if so change displayed graph
+        graph_select_new = root.notebook_frames[4].graphs_list.curselection()[0]
+        if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
+            #print(root.notebook_frames[4].graphs_list.get(graph_select_new))
+            if root.notebook_frames[4].graphs_list.get(graph_select_new) == "Water Temperature":
+                display_water_temperature_graph(root.notebook_frames[4], operators.samples, operators.temperatures)
+            elif root.notebook_frames[4].graphs_list.get(graph_select_new) == "Heater Power":
+                display_heater_power_graph(root.notebook_frames[4], operators.samples, operators.temperatures)
+        graph_select_old = graph_select_new
 
         sleep(constants.simulation_tick/1000)
         simulation_counter += constants.simulation_tick
         tick_counter += 1
         
+def display_water_temperature_graph(root, x_vals, y_vals):
+    root.ax.clear()
+    root.ax.plot(x_vals, y_vals, color="r")
+    root.ax.set_ylim((0, 125))
+    root.ax.set_xlabel("time [s]")
+    root.ax.set_ylabel("T [°C]")
+    root.ax.set_title(label="Water Temperature")
+    root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
+    #root.ax.legend()
+    root.canvas.draw()
+
+def display_heater_power_graph(root, x_vals, y_vals):
+    root.ax.clear()
+    root.ax.plot(x_vals, y_vals, color="r")
+    root.ax.set_ylim((0, 125))
+    root.ax.set_xlabel("time [s]")
+    root.ax.set_ylabel("P [W]")
+    root.ax.set_title(label="Heater Power")
+    root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
+    #root.ax.legend()
+    root.canvas.draw()
+
 
 if __name__ == "__main__":
     main = MainWindow()
