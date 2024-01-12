@@ -7,8 +7,6 @@ from threading import Thread
 from time import sleep
 import functions
 
-
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
@@ -86,8 +84,19 @@ class SimulationFrame(tk.Frame):
 
 
     def create_ui(self):
-        #button_position = ttk.Label(self)
-        #button_position.grid(column=0, row=1, columnspan=4, pady=50)
+
+        self.image_placeholder = tk.PhotoImage(width=50, height=50)
+
+        image_label = ttk.Label(self, image=self.image_placeholder)
+        image_label.grid(column=0, row=0, columnspan=4, pady=10)
+        image_label.place(x=670, y=350, anchor="center")
+
+        im0 = Image.open('0.png')
+        im0 = im0.resize((750, 600))
+
+        self.image_placeholder = ImageTk.PhotoImage(im0)
+
+        image_label['image'] = self.image_placeholder
 
         start_button = ttk.Button(self, text="Start", command=self.start)
         start_button.grid(column=0, row=1, padx=130, pady=670)
@@ -101,7 +110,8 @@ class SimulationFrame(tk.Frame):
         rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
         rewind_button.grid(column=3, row=1, padx=130, pady=0)
 
-
+        
+       
 
     def start(self):
         print(self.image_path_1.get())
@@ -128,20 +138,7 @@ class InputsFrame(tk.Frame):
         self.long_name = "InputsFrame"
         self.parent = parent
         self.grid()
-
-        #label = ttk.Label(self, text="water level: ")
-        #label.grid(column=0, row=0)
-
-        #self.input_entry = ttk.Entry(self)
-        #self.input_entry.grid(column=1, row=0)
-
-        #label2 = ttk.Label(self, text="heater_temperature: ")
-        #label2.grid(column=0, row=0)
-
-        #self.input_entry2 = ttk.Entry(self)
-        #self.input_entry2.grid(column=1, row=0)
-
-        # input label field
+        
         input_label = ttk.Label(self, text="Input: ")
         input_label.grid(column=0, row=0, padx=(0, 5))
 
@@ -165,28 +162,15 @@ class InputsFrame(tk.Frame):
         self.heater_temperature_entry = ttk.Entry(self)
         self.heater_temperature_entry.grid(column=1, row=2)
 
-        
-        # self.create_ui()
-        # self.content_update()
+        # Slider code
+        heater_power_label = ttk.Label(self, text="Heating power: ")
+        heater_power_label.grid(column=0, row=4, padx=(0, 5), pady=(20, 0))
+        self.my_scale=tk.Scale(self, orient="horizontal",cursor="dot", from_=500, to= 10000, length = 400, resolution = 100)
+        self.my_scale.grid(column=1, row=4, padx=0, pady=0)
 
-    def create_ui(self):
-        pass
 
-    def content_update(self):
-        pass
-
-class ControlFrame(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent, padx=10, pady=10)
-        self.name = "Control"
-        self.long_name = "ControlFrame"
-        self.parent = parent
-        self.grid()
-
-        label = ttk.Label(self, text="Tab 2")
-        label.grid(column=0, row=0)
         self.create_ui()
-        # self.content_update()
+        self.content_update()
 
     def create_ui(self):
         pass
@@ -262,6 +246,7 @@ class GraphsFrame(tk.Frame):
 
         self.canvas.get_tk_widget().grid(column=1, row=0, columnspan=2)
 
+        
     def content_update(self):
         pass
 
@@ -272,21 +257,22 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
+    
     simulation_counter = 0
     tick_counter = 0
     counter = 0
     graph_select_old, graph_select_new = root.notebook_frames[4].graphs_list.curselection()[0], root.notebook_frames[4].graphs_list.curselection()[0]
     operators = functions.Functions(simulation_sampling_rate, 1)
-    operators.heatinginitialize(20, 2500)
+    root.notebook_frames[1].my_scale.set(2000)
+    operators.heatinginitialize(20, root.notebook_frames[1].my_scale.get())
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
-            #print("One sample")
             simulation_counter = 0
             operators.heatingupwater(1000/simulation_sampling_rate)
-            
-            counter += 1    
+            operators.gettingpower(root.notebook_frames[1].my_scale.get())
+            counter += 1
 
         if ( tick_counter > 65000):
             tick_counter = 0
