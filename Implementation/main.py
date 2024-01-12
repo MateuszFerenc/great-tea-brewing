@@ -261,30 +261,32 @@ def logic_thread(root):
     simulation_counter = 0
     tick_counter = 0
     counter = 0
-    graph_select_old, graph_select_new = root.notebook_frames[4].graphs_list.curselection()[0], root.notebook_frames[4].graphs_list.curselection()[0]
-    operators = functions.Functions(simulation_sampling_rate, 1)
+    graph_select_old, graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0], root.notebook_frames[3].graphs_list.curselection()[0]
+    operators = functions.Functions(1000/simulation_sampling_rate, 1)
     root.notebook_frames[1].my_scale.set(2000)
     operators.heatinginitialize(20, root.notebook_frames[1].my_scale.get())
+    scale_sample = []
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             simulation_counter = 0
-            operators.heatingupwater(1000/simulation_sampling_rate)
+            operators.heatingupwater()
             operators.gettingpower(root.notebook_frames[1].my_scale.get())
+            scale_sample.append(root.notebook_frames[1].my_scale.get())
             counter += 1
 
         if ( tick_counter > 65000):
             tick_counter = 0
 
         # check if a other graph was selected, if so change displayed graph
-        graph_select_new = root.notebook_frames[4].graphs_list.curselection()[0]
+        graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0]
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
             #print(root.notebook_frames[4].graphs_list.get(graph_select_new))
-            if root.notebook_frames[4].graphs_list.get(graph_select_new) == "Water Temperature":
-                display_water_temperature_graph(root.notebook_frames[4], operators.samples, operators.temperatures)
-            elif root.notebook_frames[4].graphs_list.get(graph_select_new) == "Heater Power":
-                display_heater_power_graph(root.notebook_frames[4], operators.samples, operators.temperatures)
+            if root.notebook_frames[3].graphs_list.get(graph_select_new) == "Water Temperature":
+                display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.temperatures)
+            elif root.notebook_frames[3].graphs_list.get(graph_select_new) == "Heater Power":
+                display_heater_power_graph(root.notebook_frames[3], operators.samples, scale_sample)
         graph_select_old = graph_select_new
 
         sleep(constants.simulation_tick/1000)
@@ -305,7 +307,7 @@ def display_water_temperature_graph(root, x_vals, y_vals):
 def display_heater_power_graph(root, x_vals, y_vals):
     root.ax.clear()
     root.ax.plot(x_vals, y_vals, color="r")
-    root.ax.set_ylim((0, 125))
+    root.ax.set_ylim((500, 10000))
     root.ax.set_xlabel("time [s]")
     root.ax.set_ylabel("P [W]")
     root.ax.set_title(label="Heater Power")

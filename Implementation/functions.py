@@ -2,8 +2,7 @@ import math
 from random import *
 
 class Functions:
-    def __init__(self, sample_time: int, initial_volume: float, boiler_height: float = 0.1, bolier_width: float = 0.1, boiler_depth: float = 0.2):
-        assert type(sample_time) is int
+    def __init__(self, sample_time: float, initial_volume: float, boiler_height: float = 0.1, bolier_width: float = 0.1, boiler_depth: float = 0.2):
         assert sample_time > 0
         assert initial_volume > 0
 
@@ -55,7 +54,7 @@ class Functions:
         self.Q = self.actualpower * self.heating_time
         self.Q_loss = self.h * self.A * (self.T_2 - self.T_env) * self.heating_time
         self.samples.append(self.heating_time)
-        self.heating_time = round(self.heating_time + round(self.sample_time / 1000, 4), 4)
+        self.heating_time = round(self.heating_time + self.sample_time, 4)
         self.Q_net = self.Q - self.Q_loss
         delta_T = self.Q_net / (self.c * self.m)
         self.T_2 = self.T_1 + delta_T
