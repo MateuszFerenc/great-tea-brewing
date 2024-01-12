@@ -7,8 +7,6 @@ from threading import Thread
 from time import sleep
 import functions
 
-
-
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib
@@ -112,7 +110,8 @@ class SimulationFrame(tk.Frame):
         rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
         rewind_button.grid(column=3, row=1, padx=130, pady=0)
 
-
+        
+       
 
     def start(self):
         print(self.image_path_1.get())
@@ -163,9 +162,13 @@ class InputsFrame(tk.Frame):
         self.heater_temperature_entry = ttk.Entry(self)
         self.heater_temperature_entry.grid(column=1, row=2)
 
-        
-        # self.create_ui()
-        # self.content_update()
+        #Slider with default vlaue set as 2000
+        self.my_scale=tk.Scale(self, orient="vertical",cursor="dot", from_=10000, to= 500, length = 400, resolution = 100)
+        self.my_scale.grid(column=4, row=1, padx=130, pady=0)
+        self.my_scale.set(2000)
+
+        self.create_ui()
+        self.content_update()
 
     def create_ui(self):
         pass
@@ -280,10 +283,14 @@ def logic_thread(root):
     operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
-            print("One sample")
             simulation_counter = 0
-            operators.heatingupwater(1000/simulation_sampling_rate)
-            
+            operators.heatingupwater()
+
+            root.notebook_frames[0].ax.clear()
+            root.notebook_frames[0].ax.plot(operators.samples, operators.temperatures, color="r")
+            root.notebook_frames[0].ax.set_ylim((0, 125))
+            root.notebook_frames[0].canvas.draw()
+            operators.gettingpower(root.notebook_frames[1].my_scale.get())
             counter += 1
 
         if ( not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time):
