@@ -162,32 +162,15 @@ class InputsFrame(tk.Frame):
         self.heater_temperature_entry = ttk.Entry(self)
         self.heater_temperature_entry.grid(column=1, row=2)
 
-        #Slider with default vlaue set as 2000
-        self.my_scale=tk.Scale(self, orient="vertical",cursor="dot", from_=10000, to= 500, length = 400, resolution = 100)
-        self.my_scale.grid(column=4, row=1, padx=130, pady=0)
-        self.my_scale.set(2000)
+        # Slider code
+        heater_power_label = ttk.Label(self, text="Heating power: ")
+        heater_power_label.grid(column=0, row=4, padx=(0, 5), pady=(20, 0))
+        self.my_scale=tk.Scale(self, orient="horizontal",cursor="dot", from_=500, to= 10000, length = 400, resolution = 100)
+        self.my_scale.grid(column=1, row=4, padx=0, pady=0)
+
 
         self.create_ui()
         self.content_update()
-
-    def create_ui(self):
-        pass
-
-    def content_update(self):
-        pass
-
-class ControlFrame(tk.Frame):
-    def __init__(self, parent):
-        super().__init__(parent, padx=10, pady=10)
-        self.name = "Control"
-        self.long_name = "ControlFrame"
-        self.parent = parent
-        self.grid()
-
-        label = ttk.Label(self, text="Tab 2")
-        label.grid(column=0, row=0)
-        self.create_ui()
-        # self.content_update()
 
     def create_ui(self):
         pass
@@ -264,6 +247,7 @@ class GraphsFrame(tk.Frame):
 
         self.canvas.get_tk_widget().grid(column=1, row=0, columnspan=2)
 
+        
     def content_update(self):
         pass
 
@@ -274,11 +258,13 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
+    
     simulation_counter = 0
     tick_counter = 0
     counter = 0
     operators = functions.Functions(simulation_sampling_rate, 1)
-    operators.heatinginitialize(20, 2500)
+    root.notebook_frames[1].my_scale.set(2000)
+    operators.heatinginitialize(20, root.notebook_frames[1].my_scale.get())
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
@@ -286,19 +272,18 @@ def logic_thread(root):
             simulation_counter = 0
             operators.heatingupwater()
 
-            root.notebook_frames[0].ax.clear()
-            root.notebook_frames[0].ax.plot(operators.samples, operators.temperatures, color="r")
-            root.notebook_frames[0].ax.set_ylim((0, 125))
-            root.notebook_frames[0].canvas.draw()
+            #root.notebook_frames[0].ax.clear()
+            #root.notebook_frames[0].ax.plot(operators.samples, operators.temperatures, color="r")
+            #root.notebook_frames[0].ax.set_ylim((0, 125))
+            #root.notebook_frames[0].canvas.draw()
             operators.gettingpower(root.notebook_frames[1].my_scale.get())
             counter += 1
 
         if ( not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time):
-            root.notebook_frames[4].ax.clear()
-            root.notebook_frames[4].ax.plot(operators.samples, operators.temperatures, color="r")
-            root.notebook_frames[4].ax.set_ylim((0, 125))
-
-            root.notebook_frames[4].canvas.draw()
+            root.notebook_frames[3].ax.clear()
+            root.notebook_frames[3].ax.plot(operators.samples, operators.temperatures, color="r")
+            root.notebook_frames[3].ax.set_ylim((0, 125))
+            root.notebook_frames[3].canvas.draw()
 
         if ( tick_counter > 65000):
             tick_counter = 0
