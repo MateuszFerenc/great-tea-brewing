@@ -85,55 +85,11 @@ class SimulationFrame(tk.Frame):
         image_label.place(x=670, y=350, anchor="center")
 
         im0 = Image.open('0.png')
-        #im1 = Image.open('1.png')
-        #im2 = Image.open('2.png')
-        #im3 = Image.open('3.png')
         im0 = im0.resize((750, 600))
-        #im1 = im1.resize((750, 600))
-        #im2 = im2.resize((750, 600))
-        #im3 = im.resize((750, 600))
 
         self.image_placeholder = ImageTk.PhotoImage(im0)
-        #self.image_placeholder = ImageTk.PhotoImage(im1)
-        #self.image_placeholder = ImageTk.PhotoImage(im2)
 
         image_label['image'] = self.image_placeholder
-
-
-
-        #self.image_placeholder = tk.PhotoImage(width=50, height=50)
-
-        #image_label = ttk.Label(self, image=self.image_placeholder)
-        #image_label.grid(column=0, row=0, columnspan=4, pady=10)
-
-        #im = Image.open('hui.png')
-
-        #self.image_placeholder.image = ImageTk.PhotoImage(im)
-        #self.image_placeholder.config(image=self.image_placeholder.image)
-
-
-
-        #win=Tk()
-        #image_placeholder = tk.PhotoImage(width=50, height=50)  # Adjust width and height accordingly
-        #image_label = ttk.Label(self, image=image_placeholder)
-        #image_label.grid(column=0, row=0, columnspan=4, pady=10)
-        #parent = tk.Tk()
-        #parent.title("Image in Tkinter")
-        #tk_image = ImageTk.PhotoImage(image)
-
-        #Load and display an image 
-        #(replace 'your_logo.png' with the path to your image file)
-        #im = Image.open('hui.png')
-
-        #Create a label to display the image
-        #image_label = tk.Label(parent, image=image)
-        #image_label.pack()
-        #bg = ImageTk.PhotoImage(file="placeholder.svg")
-        #label=Label(win, image=bg)
-        #label.place(x=0, y=0)
-
-        #button_position = ttk.Label(self)
-        #button_position.grid(column=0, row=1, columnspan=4, pady=50)
 
         start_button = ttk.Button(self, text="Start", command=self.start)
         start_button.grid(column=0, row=1, padx=130, pady=670)
@@ -174,20 +130,7 @@ class InputsFrame(tk.Frame):
         self.long_name = "InputsFrame"
         self.parent = parent
         self.grid()
-
-        #label = ttk.Label(self, text="water level: ")
-        #label.grid(column=0, row=0)
-
-        #self.input_entry = ttk.Entry(self)
-        #self.input_entry.grid(column=1, row=0)
-
-        #label2 = ttk.Label(self, text="heater_temperature: ")
-        #label2.grid(column=0, row=0)
-
-        #self.input_entry2 = ttk.Entry(self)
-        #self.input_entry2.grid(column=1, row=0)
-
-        # input label field
+        
         input_label = ttk.Label(self, text="Input: ")
         input_label.grid(column=0, row=0, padx=(0, 5))
 
