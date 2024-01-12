@@ -67,8 +67,9 @@ class Functions:
 
 def heater_temperature():
     try:
-        number = int(entry.get())  #getting the number from entry
-        intervals = [(0, 5), (5, 10), (10, 15), ..., (95, 100)]
+        number = float((self.temperatures[-1]/self.temp_Max)/100)  #getting the number from entry
+        intervals = [(0, 5), (5, 10), (10, 15), (15, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50), (50, 55), (55, 60), (60, 65), (65, 70), 
+                     (70, 75), (75, 80), (80, 85), (85, 90), (90, 95), (95, 100)]
 
         for interval in intervals:
             if interval[0] <= number <= interval[1]:
@@ -85,35 +86,36 @@ def heater_temperature():
 
 def display_image_heater_temperature(interval):
     placeholder_image_paths = {
-            (0, 5): "ht0.png",
-            (5, 10): "ht1.png",
-            (10, 15): "ht2.png",
-            (15, 20): "ht3.png",
-            (20, 25): "ht4.png",
-            (25, 30): "ht5.png",
-            (30, 35): "ht6.png",
-            (35, 40): "ht7.png",
-            (40, 45): "ht8.png",
-            (45, 50): "ht9.png",
-            (50, 55): "ht10.png",
-            (55, 60): "ht11.png",
-            (60, 65): "ht12.png",
-            (65, 70): "ht13.png",
-            (70, 75): "ht14.png",
-            (75, 80): "ht15.png",
-            (80, 85): "ht16.png",
-            (85, 90): "ht17.png",
-            (90, 95): "ht18.png",
-            (95, 100): "ht19.png",
-            (0, 0): "ht20",
-            (100, 100): "ht21.png",
+            (0, 0): "Assets\images\heater_temperature\0.png",
+            (0, 5): "Assets\images\heater_temperature\1.png",
+            (5, 10): "Assets\images\heater_temperature\2.png",
+            (10, 15): "Assets\images\heater_temperature\3.png",
+            (15, 20): "Assets\images\heater_temperature\4.png",
+            (20, 25): "Assets\images\heater_temperature\5.png",
+            (25, 30): "Assets\images\heater_temperature\6.png",
+            (30, 35): "Assets\images\heater_temperature\7.png",
+            (35, 40): "Assets\images\heater_temperature\8.png",
+            (40, 45): "Assets\images\heater_temperature\9.png",
+            (45, 50): "Assets\images\heater_temperature\10.png",
+            (50, 55): "Assets\images\heater_temperature\11.png",
+            (55, 60): "Assets\images\heater_temperature\12.png",
+            (60, 65): "Assets\images\heater_temperature\13.png",
+            (65, 70): "Assets\images\heater_temperature\14.png",
+            (70, 75): "Assets\images\heater_temperature\15.png",
+            (75, 80): "Assets\images\heater_temperature\16.png",
+            (80, 85): "Assets\images\heater_temperature\17.png",
+            (85, 90): "Assets\images\heater_temperature\18.png",
+            (90, 95): "Assets\images\heater_temperature\19.png",
+            (95, 100): "Assets\images\heater_temperature\20.png",
+            (100, 100): "Assets\images\heater_temperature\21.png",
     }
 
 
 def puring_in():
     try:
-        number = int(entry.get())  #getting the number from entry
-        intervals = [(0, 5), (5, 10), (10, 15), ..., (95, 100)]
+        number = float()  #getting the number from entry
+        intervals = [(0, 5), (5, 10), (10, 15), (15, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50), (50, 55), (55, 60), (60, 65), (65, 70), 
+                     (70, 75), (75, 80), (80, 85), (85, 90), (90, 95), (95, 100)]
 
         for interval in intervals:
             if interval[0] <= number <= interval[1]:
@@ -130,35 +132,36 @@ def puring_in():
 
 def display_image_puring_in(interval):
     placeholder_image_paths = {
-            (0, 5): "pi0.png",
-            (5, 10): "pi1.png",
-            (10, 15): "pi2.png",
-            (15, 20): "pi3.png",
-            (20, 25): "pi4.png",
-            (25, 30): "pi5.png",
-            (30, 35): "pi6.png",
-            (35, 40): "pi7.png",
-            (40, 45): "pi8.png",
-            (45, 50): "pi9.png",
-            (50, 55): "pi10.png",
-            (55, 60): "pi11.png",
-            (60, 65): "pi12.png",
-            (65, 70): "pi13.png",
-            (70, 75): "pi14.png",
-            (75, 80): "pi15.png",
-            (80, 85): "pi16.png",
-            (85, 90): "pi17.png",
-            (90, 95): "pi18.png",
-            (95, 100): "pi19.png",
-            (0, 0): "pi20",
-            (100, 100): "pi21.png",
+            (0, 0): "Assets\images\pouring_in\0.png",
+            (0, 5): "Assets\images\pouring_in\1.png",
+            (5, 10): "Assets\images\pouring_in\2.png",
+            (10, 15): "Assets\images\pouring_in\3.png",
+            (15, 20): "Assets\images\pouring_in\4.png",
+            (20, 25): "Assets\images\pouring_in\5.png",
+            (25, 30): "Assets\images\pouring_in\6.png",
+            (30, 35): "Assets\images\pouring_in\7.png",
+            (35, 40): "Assets\images\pouring_in\8.png",
+            (40, 45): "Assets\images\pouring_in\9.png",
+            (45, 50): "Assets\images\pouring_in\10.png",
+            (50, 55): "Assets\images\pouring_in\11.png",
+            (55, 60): "Assets\images\pouring_in\12.png",
+            (60, 65): "Assets\images\pouring_in\13.png",
+            (65, 70): "Assets\images\pouring_in\14.png",
+            (70, 75): "Assets\images\pouring_in\15.png",
+            (75, 80): "Assets\images\pouring_in\16.png",
+            (80, 85): "Assets\images\pouring_in\17.png",
+            (85, 90): "Assets\images\pouring_in\18.png",
+            (90, 95): "Assets\images\pouring_in\19.png",
+            (95, 100): "Assets\images\pouring_in\20.png",
+            (100, 100): "Assets\images\pouring_in\21.png",
     }
 
 
 def puring_out():
     try:
         number = int(entry.get())  #getting the number from entry
-        intervals = [(0, 5), (5, 10), (10, 15), ..., (95, 100)]
+        intervals = [(0, 5), (5, 10), (10, 15), (15, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50), (50, 55), (55, 60), (60, 65), (65, 70), 
+                     (70, 75), (75, 80), (80, 85), (85, 90), (90, 95), (95, 100)]
 
         for interval in intervals:
             if interval[0] <= number <= interval[1]:
@@ -175,35 +178,36 @@ def puring_out():
 
 def display_image_puring_out(interval):
     placeholder_image_paths = {
-            (0, 5): "po0.png",
-            (5, 10): "po1.png",
-            (10, 15): "po2.png",
-            (15, 20): "po3.png",
-            (20, 25): "po4.png",
-            (25, 30): "po5.png",
-            (30, 35): "po6.png",
-            (35, 40): "po7.png",
-            (40, 45): "po8.png",
-            (45, 50): "po9.png",
-            (50, 55): "po10.png",
-            (55, 60): "po11.png",
-            (60, 65): "po12.png",
-            (65, 70): "po13.png",
-            (70, 75): "po14.png",
-            (75, 80): "po15.png",
-            (80, 85): "po16.png",
-            (85, 90): "po17.png",
-            (90, 95): "po18.png",
-            (95, 100): "po19.png",
-            (0, 0): "po20",
-            (100, 100): "po21.png",
+            (0, 0): "Assets\images\pouring_out\0.png",
+            (0, 5): "Assets\images\pouring_out\1.png",
+            (5, 10): "Assets\images\pouring_out\2.png",
+            (10, 15): "Assets\images\pouring_out\3.png",
+            (15, 20): "Assets\images\pouring_out\4.png",
+            (20, 25): "Assets\images\pouring_out\5.png",
+            (25, 30): "Assets\images\pouring_out\6.png",
+            (30, 35): "Assets\images\pouring_out\7.png",
+            (35, 40): "Assets\images\pouring_out\8.png",
+            (40, 45): "Assets\images\pouring_out\9.png",
+            (45, 50): "Assets\images\pouring_out\10.png",
+            (50, 55): "Assets\images\pouring_out\11.png",
+            (55, 60): "Assets\images\pouring_out\12.png",
+            (60, 65): "Assets\images\pouring_out\13.png",
+            (65, 70): "Assets\images\pouring_out\14.png",
+            (70, 75): "Assets\images\pouring_out\15.png",
+            (75, 80): "Assets\images\pouring_out\16.png",
+            (80, 85): "Assets\images\pouring_out\17.png",
+            (85, 90): "Assets\images\pouring_out\18.png",
+            (90, 95): "Assets\images\pouring_out\19.png",
+            (95, 100): "Assets\images\pouring_out\20.png",
+            (100, 100): "Assets\images\pouring_out\21.png",
     }
 
 
 def water_level():
     try:
         number = int(entry.get())  #getting the number from entry
-        intervals = [(0, 5), (5, 10), (10, 15), ..., (95, 100)]
+        intervals = [(0, 5), (5, 10), (10, 15), (15, 20), (20, 25), (25, 30), (30, 35), (35, 40), (40, 45), (45, 50), (50, 55), (55, 60), (60, 65), (65, 70), 
+                     (70, 75), (75, 80), (80, 85), (85, 90), (90, 95), (95, 100)]
 
         for interval in intervals:
             if interval[0] <= number <= interval[1]:
@@ -220,26 +224,26 @@ def water_level():
 
 def display_image_water_level(interval):
     placeholder_image_paths = {
-            (0, 5): "wl0.png",
-            (5, 10): "wl1.png",
-            (10, 15): "wl2.png",
-            (15, 20): "wl3.png",
-            (20, 25): "wl4.png",
-            (25, 30): "wl5.png",
-            (30, 35): "wl6.png",
-            (35, 40): "wl7.png",
-            (40, 45): "wl8.png",
-            (45, 50): "wl9.png",
-            (50, 55): "wl10.png",
-            (55, 60): "wl11.png",
-            (60, 65): "wl12.png",
-            (65, 70): "wl13.png",
-            (70, 75): "wl14.png",
-            (75, 80): "wl15.png",
-            (80, 85): "wl16.png",
-            (85, 90): "wl17.png",
-            (90, 95): "wl18.png",
-            (95, 100): "wl19.png",
-            (0, 0): "wl20",
-            (100, 100): "wl21.png",
+            (0, 0): "Assets\images\water_level\0.png",
+            (0, 5): "Assets\images\water_level\1.png",
+            (5, 10): "Assets\images\water_level\2.png",
+            (10, 15): "Assets\images\water_level\3.png",
+            (15, 20): "Assets\images\water_level\4.png",
+            (20, 25): "Assets\images\water_level\5.png",
+            (25, 30): "Assets\images\water_level\6.png",
+            (30, 35): "Assets\images\water_level\7.png",
+            (35, 40): "Assets\images\water_level\8.png",
+            (40, 45): "Assets\images\water_level\9.png",
+            (45, 50): "Assets\images\water_level\10.png",
+            (50, 55): "Assets\images\water_level\11.png",
+            (55, 60): "Assets\images\water_level\12.png",
+            (60, 65): "Assets\images\water_level\13.png",
+            (65, 70): "Assets\images\water_level\14.png",
+            (70, 75): "Assets\images\water_level\15.png",
+            (75, 80): "Assets\images\water_level\16.png",
+            (80, 85): "Assets\images\water_level\17.png",
+            (85, 90): "Assets\images\water_level\18.png",
+            (90, 95): "Assets\images\water_level\19.png",
+            (95, 100): "Assets\images\water_level\20.png",
+            (100, 100): "Assets\images\water_level\21.png",
     }

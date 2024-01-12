@@ -77,6 +77,7 @@ class SimulationFrame(tk.Frame):
         self.long_name = "SimulationFrame"
         self.parent = parent
         self.grid()
+        
 
         #label = ttk.Label(self, text="Tab 0")
         #label.grid(column=0, row=0)
@@ -87,30 +88,36 @@ class SimulationFrame(tk.Frame):
 
     def create_ui(self):
 
-        self.image_placeholder = tk.PhotoImage(width=50, height=50)
+        self.image_paths = ['0.png', '1.png', '2.png', '3.png']
+        #self.image_paths = image.paths
+        self.images = [Image.open(path) for path in self.image_paths]
 
-        image_label = ttk.Label(self, image=self.image_placeholder)
-        image_label.grid(column=0, row=0, columnspan=4, pady=10)
-        image_label.place(x=670, y=350, anchor="center")
+        width, height = 370, 290
+        self.images = [img.resize((750, 600), Image.LANCZOS) for img in self.images]
 
-        im0 = Image.open('0.png')
-        im0 = im0.resize((750, 600))
+        self.result_image = Image.new('RGBA', (width * 2, height * 2), (0, 0, 0, 0))
 
-        self.image_placeholder = ImageTk.PhotoImage(im0)
+        positions = [(0, 0), (0, 0), (0, 0), (0, 0)]
+        for img, pos in zip(self.images, positions):
+            self.result_image.paste(img, pos, img)
 
-        image_label['image'] = self.image_placeholder
+        self.tk_image = ImageTk.PhotoImage(self.result_image)
+
+        self.label = tk.Label(self, image=self.tk_image)
+        self.label.grid(row=0, column=0, padx=5, pady=5)
+
 
         start_button = ttk.Button(self, text="Start", command=self.start)
-        start_button.grid(column=0, row=1, padx=130, pady=670)
+        start_button.grid(column=15, row=0, padx=0, pady=0)
 
-        stop_button = ttk.Button(self, text="Stop", command=self.stop)
-        stop_button.grid(column=1, row=1, padx=130, pady=0)
+        # stop_button = ttk.Button(self, text="Stop", command=self.stop)
+        # stop_button.grid(column=1, row=1, padx=10, pady=0)
 
-        restart_button = ttk.Button(self, text="Restart", command=self.restart)
-        restart_button.grid(column=2, row=1, padx=130, pady=0)
+        # restart_button = ttk.Button(self, text="Restart", command=self.restart)
+        # restart_button.grid(column=2, row=1, padx=10, pady=0)
 
-        rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
-        rewind_button.grid(column=3, row=1, padx=130, pady=0)
+        # rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
+        # rewind_button.grid(column=3, row=1, padx=10, pady=0)
 
 
 
@@ -140,14 +147,14 @@ class InputsFrame(tk.Frame):
         self.parent = parent
         self.grid()
         
-        input_label = ttk.Label(self, text="Input: ")
+        input_label = ttk.Label(self, text="Heater Temperature: ")
         input_label.grid(column=0, row=0, padx=(0, 5))
 
         self.input_entry = ttk.Entry(self)
         self.input_entry.grid(column=1, row=0)
 
         # output label field
-        output_label = ttk.Label(self, text="Output: ")
+        output_label = ttk.Label(self, text="Pouring in: ")
         output_label.grid(column=0, row=1, padx=(0, 5), pady=(10, 0))
         
         self.output_entry = ttk.Entry(self)
@@ -279,6 +286,7 @@ def logic_thread(root):
     #operators.pouringinitialize(1, 0, 0)
     operators.V = 10 / 1000
     while 1:
+        root.notebook_frames[0].image_paths = ['0.png', '1.png', '2.png', '3.png']
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
