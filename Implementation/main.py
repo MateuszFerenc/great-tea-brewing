@@ -278,16 +278,17 @@ def logic_thread(root):
     simulation_counter = 0
     counter = 0
     operators = functions.Functions(simulation_sampling_rate, 100)
-    operators.heatinginitialize(10, 100)
-    operators.pouringinitialize(1, 0, 0)
+    operators.heatinginitialize(10, 2000)
+    #operators.pouringinitialize(1, 0, 0)
+    operators.V = 10 / 1000
     while 1:
         if ( simulation_counter >= 1000/simulation_sampling_rate):
             print("One sample")
             simulation_counter = 0
-            operators.heatingupwater(counter)
+            operators.heatingupwater()
 
             root.notebook_frames[0].ax.clear()
-            root.notebook_frames[0].ax.plot(operators.heating_time, operators.temp, color="r")
+            root.notebook_frames[0].ax.plot(operators.samples, operators.temperatures, color="r")
             root.notebook_frames[0].ax.set_ylim((0, 125))
 
             root.notebook_frames[0].canvas.draw()
