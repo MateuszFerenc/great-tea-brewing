@@ -13,3 +13,8 @@ assert type(simulation_tick) is int
 assert (1000/simulation_default_sampling) >= simulation_tick
 
 plot_names = ("Water Temperature", "Heater Power")
+RUNNING = 'running'
+STOPPED = 'stopped'
+PAUSED = 'paused'
+REWIND = 'rewind'
+RESTART = 'restart'

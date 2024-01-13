@@ -76,42 +76,23 @@ class SimulationFrame(tk.Frame):
         self.name = "Simulation"
         self.long_name = "SimulationFrame"
         self.parent = parent
-        self.grid()
-        self.guard = None
+        self.grid(column=4, row=2)
 
-        #label = ttk.Label(self, text="Tab 0")
-        #label.grid(column=0, row=0)
+        self.simulation_state = constants.STOPPED
         
         self.create_ui()
-        self.content_update()
-
 
     def create_ui(self):
-
-        #if self.guard == image_paths: 
-        #   return
-        #self.guard = image_paths
-
-        ### UDAŁO MI SIĘ TO ZROBIĆ, ALE MAM PROBLEM Z WRZUCANIEM NAZW PLIKÓW DO ZMIENNYCH... CIĄGLE COŚ :( 
-        ###Jakby co to mam sposób na ogarnięcie tego w sposób łopatologiczny aby działał, ale nie jestem z niego zadowolony, 
-        ##tak więc w ostateczności możemy z niego skorzystać
-
-        # Load images
-        self.image1 = tk.StringVar()
-        self.image2 = tk.StringVar()
-        self.image3 = tk.StringVar()
-        self.image4 = tk.StringVar()
-        self.image1 = '0.png'
-        self.image2 = '1.png'
-        self.image3 = '2.png'
-        self.image4 = '3.png'
-
+           # Load images
+        self.image1 = tk.StringVar(value='0.png')
+        self.image2 = tk.StringVar(value='1.png')
+        self.image3 = tk.StringVar(value='2.png')
+        self.image4 = tk.StringVar(value='3.png')
 
 
         self.image_paths = [self.image1, self.image2, self.image3, self.image4]
 
-
-        self.images = [Image.open(path) for path in self.image_paths]
+        self.images = [Image.open(path.get()) for path in self.image_paths]
 
         # Resize images to the same dimensions
         width, height = 600, 600
@@ -130,40 +111,52 @@ class SimulationFrame(tk.Frame):
 
         # Create label to display the overlaid image
         self.display = ttk.Label(self, image=self.tk_image)
-        self.display.grid(row=0, column=0, padx=5, pady=5)
+        self.display.grid(column=0, row=0, sticky=tk.EW)
 
 
-        start_button = ttk.Button(self, text="Start", command=self.start)
-        start_button.grid(column=15, row=0, padx=0, pady=0)
+        self.start_button = ttk.Button(self, text="Start", command=self.start)
+        self.start_button.grid(column=0, row=1, sticky=tk.S)
 
-        # stop_button = ttk.Button(self, text="Stop", command=self.stop)
-        # stop_button.grid(column=1, row=1, padx=10, pady=0)
+        self.pause_button = ttk.Button(self, text="Pause", command=self.pause, state=tk.DISABLED)
+        self.pause_button.grid(column=1, row=1, sticky=tk.S)
 
-        # restart_button = ttk.Button(self, text="Restart", command=self.restart)
-        # restart_button.grid(column=2, row=1, padx=10, pady=0)
+        self.restart_button = ttk.Button(self, text="Restart", command=self.restart, state=tk.DISABLED)
+        self.restart_button.grid(column=2, row=1, sticky=tk.S)
 
-        # rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
-        # rewind_button.grid(column=3, row=1, padx=10, pady=0)
+        self.rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
+        self.rewind_button.grid(column=3, row=1, sticky=tk.S)
 
-
-
-    def start(self):
-        print(self.image_path_1.get())
-
-    def content_update(self):
-        pass
+        self.timer_label = ttk.Label(self, text="Time: --- min -- s --- ms")
+        self.timer_label.grid(column=4, row=1, sticky=tk.SE)
 
     def start(self):
-        print("Start")
+        self.simulation_state = constants.RUNNING
+        self.start_button.configure(state=tk.DISABLED)
+        self.pause_button.configure(state=tk.ACTIVE)
+        self.restart_button.configure(state=tk.ACTIVE)
+        self.rewind_button.configure(state=tk.DISABLED)
 
-    def stop(self):
-        print("Stop")
+    def pause(self):
+        self.simulation_state = constants.PAUSED
+        self.start_button.configure(state=tk.ACTIVE)
+        self.pause_button.configure(state=tk.DISABLED)
+        self.restart_button.configure(state=tk.ACTIVE)
 
     def restart(self):
-        print("Restart")
+        self.simulation_state = constants.RESTART
+        self.start_button.configure(state=tk.ACTIVE)
+        self.pause_button.configure(state=tk.DISABLED)
+        self.restart_button.configure(state=tk.DISABLED)
+        self.rewind_button.configure(state=tk.ACTIVE)
 
     def rewind(self):
-        print("Rewind")
+        self.simulation_state = constants.REWIND
+        self.start_button.configure(state=tk.DISABLED)
+        self.pause_button.configure(state=tk.DISABLED)
+        self.restart_button.configure(state=tk.ACTIVE)
+        self.parent.notebook.tab(1, state=tk.DISABLED)
+        self.parent.notebook.tab(2, state=tk.DISABLED)
+        self.parent.notebook.tab(3, state=tk.DISABLED)
 
 class InputsFrame(tk.Frame):
     def __init__(self, parent):
@@ -173,6 +166,9 @@ class InputsFrame(tk.Frame):
         self.parent = parent
         self.grid()
         
+        self.create_ui()
+
+    def create_ui(self):
         input_label = ttk.Label(self, text="Heater Temperature: ")
         input_label.grid(column=0, row=0, padx=(0, 5))
 
@@ -215,15 +211,6 @@ class InputsFrame(tk.Frame):
         self.water_out.grid(column=1, row=6, padx=0, pady=0)
 
 
-        self.create_ui()
-        self.content_update()
-
-    def create_ui(self):
-        pass
-
-    def content_update(self):
-        pass
-
 class OutputsFrame(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent, padx=10, pady=10)
@@ -249,9 +236,6 @@ class OutputsFrame(tk.Frame):
     def create_ui(self):
         pass
 
-    def content_update(self):
-        pass
-
 class GraphsFrame(tk.Frame):
     def __init__(self, parent):
         super().__init__(parent, padx=10, pady=10)
@@ -268,7 +252,7 @@ class GraphsFrame(tk.Frame):
         self.graphs_list.grid(column=0, row=0)
         self.graphs_list.select_set(0)
 
-        self.fig = Figure(figsize=(5, 4), dpi=100)
+        self.fig = Figure(figsize=(7, 5), dpi=100)
         self.ax = self.fig.subplots()
         self.line, = self.ax.plot([], [])
         self.ax.set_ylim((0, 1))
@@ -278,9 +262,7 @@ class GraphsFrame(tk.Frame):
 
         self.canvas.get_tk_widget().grid(column=1, row=0, columnspan=2)
 
-        
-    def content_update(self):
-        pass
+
 
 
 sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match('.*Frame$', c))
@@ -289,33 +271,29 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
-    
     simulation_counter = 0
     tick_counter = 0
-    counter = 0
+    simulation_state = constants.STOPPED
     graph_select_old, graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0], root.notebook_frames[3].graphs_list.curselection()[0]
-    operators = functions.Functions(1000/simulation_sampling_rate, 1)
+    ms, sec, min = 0, 0, 0
+    
+    operators = functions.Functions(simulation_sampling_rate, 1000)
     root.notebook_frames[1].my_scale.set(2000)
     operators.heatinginitialize(20, root.notebook_frames[1].my_scale.get())
     scale_sample = []
-    #operators.pouringinitialize(1, 0, 0)
-    operators.V = 10 / 1000
     while 1:
-        root.notebook_frames[0].image_paths = ['0.png', '1.png', '2.png', '3.png']
-        if ( simulation_counter >= 1000/simulation_sampling_rate):
-            #root.notebook_frames[0].create_ui(image_paths) #sposób łopatologiczny niezadawalający
+        simulation_state = root.notebook_frames[0].simulation_state
+        if ( simulation_counter >= 1000/simulation_sampling_rate and simulation_state == constants.RUNNING):
             simulation_counter = 0
             operators.heatingupwater()
             operators.gettingpower(root.notebook_frames[1].my_scale.get())
             scale_sample.append(root.notebook_frames[1].my_scale.get())   
-            #adding labels with current temperature and water level
-            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.temperatures[-1]} °C") #zmieniłem zmienną bo nie działało ograniczenie na 100*C i leciało to do góry
+            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.T_2} °C")
             root.notebook_frames[2].water_level_label.configure(text=f"Water level: {operators.V} m^3")
-            counter += 1
 
         if ( tick_counter > 65000):
             tick_counter = 0
-
+        
         # check if a other graph was selected, if so change displayed graph
         graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0]
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
@@ -325,7 +303,32 @@ def logic_thread(root):
                 display_heater_power_graph(root.notebook_frames[3], operators.samples, scale_sample)
         graph_select_old = graph_select_new
 
-        sleep(constants.simulation_tick/1000)
+        if simulation_state == constants.RESTART:
+            root.notebook_frames[0].simulation_state = constants.STOPPED
+            simulation_state = constants.STOPPED
+            ms, sec, min = 0, 0, 0
+            root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
+
+        if simulation_state == constants.RUNNING:
+            ms, sec, min = count_time(ms, sec, min, ms_incr=constants.simulation_tick)
+
+        if simulation_state != constants.REWIND:
+            if simulation_state == constants.RUNNING:
+                root.notebook_frames[0].timer_label.configure(text=f"Time: {min:003n} min {sec:02n} s {ms:003n} ms")
+
+            # validate
+            sleep(constants.simulation_tick/1000)
+        else:
+            #rewind
+            if not operators.temp_reached_target():
+                operators.heatingupwater()
+            else:
+                root.notebook_frames[0].simulation_state = constants.STOPPED
+                root.notebook_frames[0].restart()
+                root.notebook.tab(1, state=tk.NORMAL)
+                root.notebook.tab(2, state=tk.NORMAL)
+                root.notebook.tab(3, state=tk.NORMAL)
+
         simulation_counter += constants.simulation_tick
         tick_counter += 1
         
@@ -351,12 +354,16 @@ def display_heater_power_graph(root, x_vals, y_vals):
     #root.ax.legend()
     root.canvas.draw()
 
-def display_image(root, image1, image2, image3, image4):#funkcja do podmiany zdjęć ale nie działa, część usunąłem
-    root.image1.set(image1)
-    root.image2.set(image2)
-    root.image3.set(image3)
-    root.image4.set(image4)
-    
+def count_time(ms: int, sec: int, min: int, ms_incr: int = 0, sec_inc: int = 0, min_incr: int = 0):
+    ms += ms_incr
+    d_ms = ms // 1000
+    ms -= d_ms * 1000
+    sec += sec_inc + d_ms
+    d_sec = sec // 60
+    ms -= d_sec * 60
+    min += min_incr + d_sec
+    return ms, sec, min
+ 
 
 if __name__ == "__main__":
     main = MainWindow()

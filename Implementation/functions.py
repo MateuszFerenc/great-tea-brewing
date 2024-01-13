@@ -10,24 +10,30 @@ class Functions:
         self.B = 0.035 #beta
         self.h_min = 0.0
         self.h_max = 5.0
-        self.sample_time = round(sample_time / 1000, 4)
+        self.sample_time = round(1 / sample_time, 4)
         self.t = [0.0]
         self.Q_d = [0.05]
         #self.Q_o = [self.B * self.h[-1] ** 0.5]
-        self.c = 4200 # specific heat of water
+
+        self.c = 4186                                                       # specific heat of water [J/(kg*K)]
         self.actualpower = 5000
         self.heating_time = 0.0
-        self.T_1 = 20
+        self.T_1 = 20                                                       # initial water temperature [°C]
+        self.T_2 = self.T_1                                                 # actual temperature [°C]
+        self.target_temperature = 100                                       # target water temperature [°C]
         self.temp_Max = 100
         self.temp_Min = 1
         self.rho = 1000                                                     # water density [kg/m^3]
-        self.V = initial_volume / 1000                                      # inital water volume [m^3]                                                       # initial water temperature (°C)
+        self.V = initial_volume / 1000                                      # initial water volume [m^3]
+        self.m = self.rho * self.V                                          # initial water mass [kg]
         self.T_env = 25                                                     # environment temperature [°C]
         self.h = 10                                                         # heat transfer coefficient [W/m^2°C]
-        self.l = boiler_depth                                               # boiler depth [m]
-        self.w = bolier_width                                               # boiler width [m]
-        self.h = boiler_height                                              # boiler height [m]
-        self.A = 2 * (self.l * self.w + self.l * self.h + self.w * self.h)  # boiler maximum volume
+        self.boiler_l = boiler_depth                                        # boiler depth [m]
+        self.boiler_w = bolier_width                                        # boiler width [m]
+        self.boiler_h = boiler_height                                       # boiler height [m]
+        self.A = 2 * (self.boiler_l * self.boiler_w + self.boiler_l * self.boiler_h + self.boiler_w * self.boiler_h)  # boiler maximum volume
+        self.heater_efficency = 0.85                                        
+        self.heat_loss = 0.05
         self.samples = []
         self.temperatures = []
 
@@ -51,16 +57,17 @@ class Functions:
         self.Q_o.append(self.B * math.sqrt(self.h[-1]))
 
     def heatingupwater(self):
-        self.Q = self.actualpower * self.heating_time
-        self.Q_loss = self.h * self.A * (self.T_2 - self.T_env) * self.heating_time
+        Q_heat = self.actualpower * self.heater_efficency * self.heating_time
+        Q_loss = self.actualpower * self.heat_loss * self.heating_time
         self.samples.append(self.heating_time)
         self.heating_time = round(self.heating_time + self.sample_time, 4)
-        self.Q_net = self.Q - self.Q_loss
-        delta_T = self.Q_net / (self.c * self.m)
-        self.T_2 = self.T_1 + round(delta_T, 2)
-        self.temperatures.append(min(max(self.T_2, self.temp_Min), self.temp_Max))
-        #jest jakiś problem z tymi wzorami, bo ta grzałka jak damy na 10000 to wywala dość mocno, 
-        #a potem ta tempertura nie pozostaje na swoim miejscu :/
+        dt_heat = Q_heat / ( self.m * self.c )
+        dt_loss = Q_loss / ( self.m * self.c )
+        self.T_2 = round(self.T_1 + dt_heat - dt_loss, 2)
+        self.temperatures.append(self.T_2)
+
+    def temp_reached_target(self):
+        return self.T_2 >= self.target_temperature
 
     def gettingpower(self, estimatedpower):
         if self.actualpower < estimatedpower: self.actualpower += randint(50,150)
