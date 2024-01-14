@@ -10,16 +10,13 @@ class Functions:
         self.B = 0.035 #beta
         self.h_min = 0.0
         self.h_max = 5.0
-        self.sample_time = round(1 / sample_time, 4)
         self.t = [0.0]
         self.Q_d = [0.05]
         #self.Q_o = [self.B * self.h[-1] ** 0.5]
 
         self.c = 4186                                                       # specific heat of water [J/(kg*K)]
         self.actualpower = 5000
-        self.heating_time = 0.0
-        self.T_1 = 20                                                       # initial water temperature [°C]
-        self.T_2 = self.T_1                                                 # actual temperature [°C]
+        self.temp = 20                                                      # actual temperature [°C]
         self.target_temperature = 100                                       # target water temperature [°C]
         self.temp_Max = 100
         self.temp_Min = 1
@@ -36,7 +33,17 @@ class Functions:
         self.heat_loss = 0.05
         self.samples = []
         self.temperatures = []
+        self.Time = 0
+        self.dTime = round(1 / sample_time, 4)
 
+    def append_sample(self) -> None:
+        self.samples.append(self.Time)
+        self.Time = round(self.Time + self.dTime, 2)
+
+    def resetoperator(self) -> None:
+        self.samples = []
+        self.temperatures = []
+        self.Time = 0
 
     def pouringinitialize(self, initial_volume, Q_d, Q_o):
         self.V = initial_volume / 1000
@@ -44,30 +51,25 @@ class Functions:
         self.Q_o = Q_o
 
     def heatinginitialize(self, initial_temperature, heater_power):
-        self.T_1 = initial_temperature
+        self.temp = initial_temperature
         self.actualpower = heater_power
-        self.heating_time = 0.0
-        self.T_2 = self.T_1
-        self.m = self.rho * self.V
 
-    def pouringwater(self): #w sumie jak patrzyłem to wzór jest mniej więcej w porządku, h to dla nas V po prostu :)
+    def pouringwater(self):
         self.t.append(self.t[-1] + self.sample_time)
         self.Q_d.append(self.Q_d[-1])
         self.h.append(min(max(self.sample_time * (self.Q_d[-1] - self.Q_o[-1]) / self.volume + self.h[-1], self.h_min), self.h_max))
         self.Q_o.append(self.B * math.sqrt(self.h[-1]))
 
     def heatingupwater(self):
-        Q_heat = self.actualpower * self.heater_efficency * self.heating_time
-        Q_loss = self.actualpower * self.heat_loss * self.heating_time
-        self.samples.append(self.heating_time)
-        self.heating_time = round(self.heating_time + self.sample_time, 4)
+        Q_heat = self.actualpower * self.heater_efficency * self.dTime
+        Q_loss = self.actualpower * self.heat_loss * self.dTime
         dt_heat = Q_heat / ( self.m * self.c )
         dt_loss = Q_loss / ( self.m * self.c )
-        self.T_2 = round(self.T_1 + dt_heat - dt_loss, 2)
+        self.temp = round(self.temp + dt_heat - dt_loss, 2)
         self.temperatures.append(self.T_2)
 
     def temp_reached_target(self):
-        return self.T_2 >= self.target_temperature
+        return self.temp >= self.target_temperature
 
     def gettingpower(self, estimatedpower):
         if self.actualpower < estimatedpower: self.actualpower += randint(50,150)
