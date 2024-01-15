@@ -1,6 +1,5 @@
 import tkinter as tk
 import tkinter.ttk as ttk
-from tkinter import ttk
 import functions
 import constants
 import re
@@ -14,8 +13,6 @@ import matplotlib
 matplotlib.use("TkAgg")
 
 from PIL import Image, ImageTk
-import os
-from pathlib import Path
 
 
 def get_center(parent, axis, val):
@@ -24,11 +21,81 @@ def get_center(parent, axis, val):
     return int(ax[axis] / 2 - val / 2)
 
 
+class my_Entry(ttk.Entry):
+    def __init__(self, master=None, **kw) -> None:
+
+        background = kw.pop('background', ...)
+        foreground = kw.pop('foreground', ...)
+        selectforeground = kw.pop('selectforeground', ...)
+        font = kw.pop('font', None)
+
+        super().__init__(master, **kw)
+
+        self.style_name = self._name + ".TEntry"
+
+        self.style = ttk.Style(master)
+        background = self.style.lookup("TEntry", "fieldbackground") if background is ... else background
+        foreground = self.style.lookup("TEntry", "foreground") if foreground is ... else foreground
+        selectforeground = self.style.lookup("TEntry", "selectforeground") if selectforeground is ... else selectforeground
+        self.style.configure(style=self.style_name, background=background, fieldbackground=background, foreground=foreground,
+                             font=font, selectforeground=selectforeground)
+        self.configure(style=self.style_name)
+
+
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
         self.alive = True
+
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+        self.style.theme_settings(self.style.theme_use(), {
+            "frames_notebook.TNotebook": {
+                "configure": {
+                    "tabposition": 'n', 
+                    "tabmargins": (2, 5, 2, 0)
+                },
+            },
+            "frames_notebook.TNotebook.Tab": {
+                "configure": {
+                    "padding": [10, 5],
+                    "font": ("Consolas", 15, "bold")
+                },
+                "map": {
+                    "padding": [("selected", [20,10])]
+                }
+            },
+            "TLabel": {
+                "configure": {
+                    "background": constants.window_background_color,
+                    "font": ("Consolas", 10, "bold")
+                }
+            },
+            "TScale": {
+                "configure": {
+                    "background": constants.window_background_color,
+                    "font": ("Consolas", 10, "bold")
+                }
+            },
+            "TEntry": {
+                "configure": {
+                    "fieldbackground ": constants.entry_background_color, 
+                    "selectbackground" : "#000000"
+                }
+            },
+            "LitteFrame.TFrame": {
+                "configure": {
+                    "background": constants.window_background_color
+                }
+            },
+            "TButton": {
+                "configure": {
+                    "font": ("Consolas", 10, "bold")
+                }
+            }
+            })
+        
         self.__drawmain__()
 
     def on_closing(self):
@@ -36,26 +103,6 @@ class MainWindow(tk.Tk):
         self.destroy()
 
     def __drawmain__(self):
-        self.style = ttk.Style()
-        self.style.theme_use('clam')
-
-        self.style.theme_settings(self.style.theme_use(), {
-            "frames_notebook.TNotebook": {
-                "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
-            },
-            "frames_notebook.TNotebook.Tab": {
-                "configure": {"padding": [10, 5], "font": ("Consolas", 15, "bold")},
-                "map":       {
-                "padding": [("selected", [20,10])]
-                }
-            },
-            "TLabel": {"configure": {"background": constants.window_background_color, "font": ("Consolas", 10, "bold")}},
-            "TScale": {"configure": {"background": constants.window_background_color, "font": ("Consolas", 10, "bold")}},
-            "TEntry": {"configure": {"fieldbackground ": constants.entry_background_color, "selectbackground" : "#000000"}},
-            "LitteFrame.TFrame": {"configure": {"background": constants.window_background_color}},
-            "TButton": {"configure": {"font": ("Consolas", 10, "bold")}}
-            })
-        
         self.title("Tea Brewing Simulator")
         self.geometry(f"{constants.window_width}x{constants.window_height}+"
                       f"{get_center(self, 'x', constants.window_width)}+{get_center(self, 'y', constants.window_height)}")
@@ -132,8 +179,7 @@ class SimulationFrame(tk.Frame):
         self.timer_label.grid(column=4, row=1, padx=(30,0), pady=(0, 0), sticky=tk.E)
 
         ttk.Label(self, text="Sample rate: \t samples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
-        ttk.Entry(self, width=3, name=constants.SAMPLES_ENTRY, font= ("Consolas", 10, "bold")).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
-
+        my_Entry(self, width=3, name=constants.SAMPLES_ENTRY, font= ("Consolas", 10, "bold")).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
 
     def start(self):
         self.simulation_state = constants.RUNNING
@@ -179,26 +225,26 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Water Initial Temperature: ").grid(column=0, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
         water_iT_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_iT_frame.grid(column=1, row=0, padx=20, pady=(20, 10), sticky=tk.NSEW)
-        ttk.Entry(water_iT_frame, width=8, name=constants.WATER_ITEMP, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        my_Entry(water_iT_frame, width=8, name=constants.WATER_ITEMP, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_iT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
         
 
         ttk.Label(self, text="Target Water Temperature: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_tT_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_tT_frame.grid(column=1, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(water_tT_frame, width=8, name=constants.WATER_TTEMP, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        my_Entry(water_tT_frame, width=8, name=constants.WATER_TTEMP, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_tT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Boiler dimensions: ").grid(column=0, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         boiler_dimensions_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         ttk.Label(boiler_dimensions_frame, text="Height: ").grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_HEIGHT, font= ("Consolas", 10, "bold")).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_HEIGHT, font= ("Consolas", 10, "bold")).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=2, row=0, padx=(0, 10), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="Width: ").grid(column=3, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_WIDTH, font= ("Consolas", 10, "bold")).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_WIDTH, font= ("Consolas", 10, "bold")).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=5, row=0, padx=(0, 10), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="Depth: ").grid(column=6, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_DEPTH, font= ("Consolas", 10, "bold")).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_DEPTH, font= ("Consolas", 10, "bold")).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=8, row=0, padx=(0, 0), sticky=tk.NSEW)
         boiler_dimensions_frame.grid(column=1, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
 
@@ -217,15 +263,15 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Heater Efficiency: ").grid(column=0, row=7, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_efficiency_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         heater_efficiency_frame.grid(column=1, row=7, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        my_Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_efficiency_frame, text="%").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Desired water amount: ").grid(column=0, row=8, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_amount_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_amount_frame.grid(column=1, row=8, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        my_Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
-        
+
 
 class OutputsFrame(tk.Frame):
     def __init__(self, parent):
@@ -477,7 +523,7 @@ def return_if_bad(is_valid: bool, input_name: str):
 # Marks invalid fields with red background
 def select_invalid(root, input):
     for epath, value, valid in input:
-        root.nametowidget(epath).configure(background=constants.entry_background_color if valid is True else '#FF0000')
+        root.nametowidget(epath).style.configure(str(epath).split(".")[-1] + ".TEntry", fieldbackground=constants.entry_background_color if valid is True else '#FF0000')
 
 # search recursively Frame widget and return list of tkinter Entry instances present in given Frame
 def rsearch_forentry(widget):
@@ -489,7 +535,7 @@ def rsearch_forentry(widget):
             temp = rsearch_forentry(w)
             if temp is not None:
                 found_entries = [*found_entries, *temp]
-        elif w.__class__.__name__ == "Entry":
+        elif w.__class__.__name__ in ("Entry", "my_Entry") :
             # append Entry instance when found
             found_entries.append(w)
 
