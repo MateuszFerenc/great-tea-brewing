@@ -28,3 +28,55 @@ BOILER_WIDTH = 'boiler_width_entry'
 BOILER_DEPTH = 'boiler_depth_entry'
 HEATER_EFFICIENCY = 'heater_efficiency_entry'
 WATER_AMOUNT = 'desired_water_amount_entry'
+
+# available entries: format, min, max, float_type, time_type
+entries_validation_dict = {
+    SAMPLES_ENTRY: {
+        "format": "^[0-9]{1,3}$",
+        "min": 1,
+        "max": 100
+    },
+    WATER_ITEMP: {
+        "format": "^[0-9]{1,2}$",
+        "min": 0,
+        "max": 45
+    },
+    WATER_TTEMP: {
+        "format": "^[0-9]{1,3}$",
+        "min": 50,
+        "max": 100
+    },
+    BOILER_HEIGHT: {
+        "format": "^[0-9]{1,3}$",
+        "min": 1,
+        "max": 300
+    },
+    BOILER_WIDTH: {
+        "format": "^[0-9]{1,3}$",
+        "min": 1,
+        "max": 300
+    },
+    BOILER_DEPTH: {
+        "format": "^[0-9]{1,3}$",
+        "min": 1,
+        "max": 300
+    },
+    HEATER_EFFICIENCY: {
+        "format": "^[0-9]{1,2}$",
+        "min": 1,
+        "max": 99
+    },
+    WATER_AMOUNT: {
+        "format": "^[0-9]+$",
+        "min": 1,
+        "max": 27000
+    }
+}
+
+entries_validation_dict[WATER_AMOUNT]["max"] = (
+    ( 
+        entries_validation_dict[BOILER_HEIGHT]["max"] *
+        entries_validation_dict[BOILER_WIDTH]["max"] *
+        entries_validation_dict[BOILER_DEPTH]["max"] 
+        ) / 1000
+)
