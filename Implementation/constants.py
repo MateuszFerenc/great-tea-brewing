@@ -1,10 +1,10 @@
 if __name__ == "__main__":
     exit(-1)
 
-window_width = 1400                             #  width of the window, can be changed if desired, be aware of layout misplace wheen changing width or height value
-window_height = 800                             #  height of the window
+window_width = 1250                             #  width of the window, can be changed if desired, be aware of layout misplace wheen changing width or height value
+window_height = 750                             #  height of the window
 window_background_color = "#BBBBBB"             # some random background color, can be changed if desired
-entry_background_color = "#999999"
+entry_background_color = "#AAAAAA"
 
 simulation_tick = 10                            # ms, amount of time for one tick of simulation
 simulation_default_sampling = 10                 # samples per second, 1000 ms / sampling = one sample time (ms) [1000ms/5=200ms => 200ms/10ms=20 simulation ticks per sample]
@@ -28,5 +28,3 @@ BOILER_WIDTH = 'boiler_width_entry'
 BOILER_DEPTH = 'boiler_depth_entry'
 HEATER_EFFICIENCY = 'heater_efficiency_entry'
 WATER_AMOUNT = 'desired_water_amount_entry'
-
-entries_tuple = (SAMPLES_ENTRY, WATER_ITEMP, WATER_TTEMP, BOILER_HEIGHT, BOILER_WIDTH, BOILER_DEPTH, HEATER_EFFICIENCY, WATER_AMOUNT)

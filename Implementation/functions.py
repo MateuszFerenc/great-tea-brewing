@@ -66,7 +66,7 @@ class Functions:
         dt_heat = Q_heat / ( self.m * self.c )
         dt_loss = Q_loss / ( self.m * self.c )
         self.temp = round(self.temp + dt_heat - dt_loss, 2)
-        self.temperatures.append(self.T_2)
+        self.temperatures.append(self.temp)
 
     def temp_reached_target(self):
         return self.temp >= self.target_temperature

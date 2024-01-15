@@ -44,15 +44,16 @@ class MainWindow(tk.Tk):
                 "configure": {"tabposition": 'n', "tabmargins": (2, 5, 2, 0)},
             },
             "frames_notebook.TNotebook.Tab": {
-                "configure": {"padding": [10, 5]},
+                "configure": {"padding": [10, 5], "font": ("Consolas", 15, "bold")},
                 "map":       {
-                "padding": [("selected", [20,10])] 
+                "padding": [("selected", [20,10])]
                 }
             },
-            "TLabel": {"configure": {"background": constants.window_background_color}},
-            "TScale": {"configure": {"background": constants.window_background_color}},
-            "TEntry": {"configure": {"background": constants.entry_background_color}},
-            "LitteFrame.TFrame": {"configure": {"background": constants.window_background_color}}
+            "TLabel": {"configure": {"background": constants.window_background_color, "font": ("Consolas", 10, "bold")}},
+            "TScale": {"configure": {"background": constants.window_background_color, "font": ("Consolas", 10, "bold")}},
+            "TEntry": {"configure": {"fieldbackground ": constants.entry_background_color, "selectbackground" : "#000000"}},
+            "LitteFrame.TFrame": {"configure": {"background": constants.window_background_color}},
+            "TButton": {"configure": {"font": ("Consolas", 10, "bold")}}
             })
         
         self.title("Tea Brewing Simulator")
@@ -61,10 +62,9 @@ class MainWindow(tk.Tk):
         self.resizable(False, False)
         self.configure(bg=constants.window_background_color)
 
-        self.grid()
-
+        
         self.notebook = ttk.Notebook(self, takefocus=False, width=constants.window_width, height=constants.window_height, style="frames_notebook.TNotebook")
-        self.notebook.grid(column=0, row=0)
+        self.notebook.grid(column=0, row=1)
 
         self.notebook_frames = []
         for win_frame in sim_frames:
@@ -128,13 +128,11 @@ class SimulationFrame(tk.Frame):
         self.rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
         self.rewind_button.grid(column=3, row=1, sticky=tk.NSEW)
 
-        timer_frame = ttk.Frame(self, style="LitteFrame.TFrame")
-        self.timer_label = ttk.Label(timer_frame, text="Time: --- min -- s --- ms")
-        self.timer_label.grid(column=0, row=0, sticky=tk.NSEW)
-        timer_frame.grid(column=4, row=1, padx=(40,0), pady=(0, 0), sticky=tk.E)
+        self.timer_label = ttk.Label(self, text="Time: --- min -- s --- ms")
+        self.timer_label.grid(column=4, row=1, padx=(30,0), pady=(0, 0), sticky=tk.E)
 
-        ttk.Label(self, text="Sample rate: \tsamples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
-        ttk.Entry(self, width=3, name=constants.SAMPLES_ENTRY).grid(column=5, row=1, padx=(90, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
+        ttk.Label(self, text="Sample rate: \t samples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
+        ttk.Entry(self, width=3, name=constants.SAMPLES_ENTRY).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
 
 
     def start(self):
@@ -185,49 +183,82 @@ class InputsFrame(tk.Frame):
         ttk.Label(water_iT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
         
 
-        ttk.Label(self, text="Target Water Temperature: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        water_tT_frame = ttk.Frame(self, style="LitteFrame.TFrame")
-        water_tT_frame.grid(column=1, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(water_tT_frame, width=8, name=constants.WATER_TTEMP).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(water_tT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
+        # ttk.Label(self, text="Target Water Temperature: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # water_tT_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        # water_tT_frame.grid(column=1, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        # ttk.Entry(water_tT_frame, width=8, name=constants.WATER_TTEMP).grid(column=0, row=0, sticky=tk.NSEW)
+        # ttk.Label(water_tT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
 
-        ttk.Label(self, text="Boiler dimensions: ").grid(column=0, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        boiler_dimensions_frame = ttk.Frame(self, style="LitteFrame.TFrame")
-        ttk.Label(boiler_dimensions_frame, text="Height: ").grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_HEIGHT).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
-        ttk.Label(boiler_dimensions_frame, text="m").grid(column=2, row=0, padx=(0, 10), sticky=tk.NSEW)
-        ttk.Label(boiler_dimensions_frame, text="Width: ").grid(column=3, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_WIDTH).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
-        ttk.Label(boiler_dimensions_frame, text="m").grid(column=5, row=0, padx=(0, 10), sticky=tk.NSEW)
-        ttk.Label(boiler_dimensions_frame, text="Depth: ").grid(column=6, row=0, sticky=tk.NSEW)
-        ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_DEPTH).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
-        ttk.Label(boiler_dimensions_frame, text="m").grid(column=8, row=0, padx=(0, 0), sticky=tk.NSEW)
-        boiler_dimensions_frame.grid(column=1, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
+        # ttk.Label(self, text="Boiler dimensions: ").grid(column=0, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # boiler_dimensions_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        # ttk.Label(boiler_dimensions_frame, text="Height: ").grid(column=0, row=0, sticky=tk.NSEW)
+        # ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_HEIGHT).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        # ttk.Label(boiler_dimensions_frame, text="m").grid(column=2, row=0, padx=(0, 10), sticky=tk.NSEW)
+        # ttk.Label(boiler_dimensions_frame, text="Width: ").grid(column=3, row=0, sticky=tk.NSEW)
+        # ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_WIDTH).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        # ttk.Label(boiler_dimensions_frame, text="m").grid(column=5, row=0, padx=(0, 10), sticky=tk.NSEW)
+        # ttk.Label(boiler_dimensions_frame, text="Depth: ").grid(column=6, row=0, sticky=tk.NSEW)
+        # ttk.Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_DEPTH).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+        # ttk.Label(boiler_dimensions_frame, text="m").grid(column=8, row=0, padx=(0, 0), sticky=tk.NSEW)
+        # boiler_dimensions_frame.grid(column=1, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
 
-        ttk.Label(self, text="Heater power: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.heater_power_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.heater_power_scale.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
+        # ttk.Label(self, text="Heater power: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # self.heater_power_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
+        # self.heater_power_scale.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
 
-        ttk.Label(self, text="Pouring water in flow level: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.water_in_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.water_in_scale.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
+        # ttk.Label(self, text="Pouring water in flow level: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # self.water_in_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
+        # self.water_in_scale.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
 
-        ttk.Label(self, text="Pouring water out flow level: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.water_out_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.water_out_scale.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
+        # ttk.Label(self, text="Pouring water out flow level: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # self.water_out_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
+        # self.water_out_scale.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
 
-        ttk.Label(self, text="Heater Efficiency: ").grid(column=0, row=7, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        heater_efficiency_frame = ttk.Frame(self, style="LitteFrame.TFrame")
-        heater_efficiency_frame.grid(column=1, row=7, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(heater_efficiency_frame, text="%").grid(column=1, row=0, sticky=tk.NSEW)
+        # ttk.Label(self, text="Heater Efficiency: ").grid(column=0, row=7, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # heater_efficiency_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        # heater_efficiency_frame.grid(column=1, row=7, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        # ttk.Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY).grid(column=0, row=0, sticky=tk.NSEW)
+        # ttk.Label(heater_efficiency_frame, text="%").grid(column=1, row=0, sticky=tk.NSEW)
 
-        ttk.Label(self, text="Desired water amount: ").grid(column=0, row=8, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        water_amount_frame = ttk.Frame(self, style="LitteFrame.TFrame")
-        water_amount_frame.grid(column=1, row=8, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        ttk.Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
+        # ttk.Label(self, text="Desired water amount: ").grid(column=0, row=8, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        # water_amount_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        # water_amount_frame.grid(column=1, row=8, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        # ttk.Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT).grid(column=0, row=0, sticky=tk.NSEW)
+        # ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
 
+    def validate_inputs(self):
+        data = []
+
+        name = constants.WATER_ITEMP
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,2}$", min = 0, max = 90)))
+
+        name = constants.WATER_TTEMP
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,3}$", min = 40, max = 100)))
+
+        name = constants.HEATER_EFFICIENCY
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,2}$", min = 0, max = 90)))
+
+        name = constants.BOILER_HEIGHT
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,3}$", min = 1, max = 150)))
+
+        name = constants.BOILER_WIDTH
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,3}$", min = 1, max = 150)))
+
+        name = constants.BOILER_DEPTH
+        value = self.nametowidget(name).get()
+        data.append((name, value, is_valid(value, "^[0-9]{1,3}$", min = 1, max = 150)))
+
+        if data[-1][2] and data[-1][2] and data[-1][2]:
+            name = constants.WATER_AMOUNT
+            value = self.nametowidget(name).get()
+            data.append((name, value, is_valid(value, "^[0-9]{1,2}$", min = 1, max = (data[-1][1] * data[-2][1] * data[-3][1]))))
+
+        return data     # return list of (widget_name, value, is_valid), ..., (widget_name, value, is_valid)
 
 class OutputsFrame(tk.Frame):
     def __init__(self, parent):
@@ -237,15 +268,22 @@ class OutputsFrame(tk.Frame):
         self.parent = parent
         self.configure(background=constants.window_background_color)
 
+        self.create_ui()
+
     def create_ui(self):
-        self.current_temperature_label = ttk.Label(self, text="Current temperature: ")
-        self.current_temperature_label.grid(column=0, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NSEW)
+        ttk.Label(self, text="Current temperature: ").grid(column=0, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NSEW)
+        curr_temp_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        curr_temp_frame.grid(column=1, row=0, padx=20, pady=(20, 10), sticky=tk.NSEW)
+        self.current_temperature_out = ttk.Label(curr_temp_frame, text="---")
+        self.current_temperature_out.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(curr_temp_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
 
-        self.current_temperature_changes_label = ttk.Label(self, text="Current temperature changes: ")
-        self.current_temperature_changes_label.grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
-
-        self.water_level_label = ttk.Label(self, text="Water level: ")
-        self.water_level_label.grid(column=0, row=2, padx=(20, 0), pady=(0, 0), sticky=tk.NSEW)
+        ttk.Label(self, text="Water level: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
+        water_lvl_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        water_lvl_frame.grid(column=1, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        self.current_water_level_out = ttk.Label(water_lvl_frame, text="---")
+        self.current_water_level_out.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_lvl_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
 
 class GraphsFrame(tk.Frame):
     def __init__(self, parent):
@@ -259,7 +297,9 @@ class GraphsFrame(tk.Frame):
 
     def create_ui(self):
         dir_var = tk.Variable(value=constants.plot_names)
-        self.graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE)
+        self.graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE,
+                                      background=constants.window_background_color, font=("Consolas", 10, "bold"),
+                                      selectbackground="#999999")
         self.graphs_list.grid(column=0, row=0, padx=60, pady=60, sticky=tk.NS)
         self.graphs_list.select_set(0)
 
@@ -290,18 +330,23 @@ def logic_thread(root):
     ms, sec, min = 0, 0, 0
     
     operators = functions.Functions(simulation_sampling_rate, 1000)
-    root.notebook_frames[1].heater_power_scale.set(2000)
+    # RESTORE root.notebook_frames[1].heater_power_scale.set(2000)
     operators.heatinginitialize(20, 1000)
     scale_sample = []
+
     while 1:
         simulation_old_state = simulation_new_state
         simulation_new_state = root.notebook_frames[0].simulation_state
 
         # validate entered values upon simulator start
         if ( simulation_new_state in (constants.RUNNING, constants.REWIND) and simulation_old_state == constants.STOPPED ):
-            is_invalid, data = validate_inputs(root)
-            if is_invalid:
-                select_invalid(data)
+            for frame in root.notebook_frames:
+                entry_widgets = rsearch_forentry(frame)
+                if entry_widgets is not None:
+                    print(f"frame: {frame.long_name}")
+                    data = inputs_validator(frame, entry_widgets)
+                    #print(data)
+                    #select_invalid(root, data)
 
 
         if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.RUNNING):
@@ -310,14 +355,17 @@ def logic_thread(root):
             operators.heatingupwater()
             operators.gettingpower(root.notebook_frames[1].heater_power_scale.get())
             scale_sample.append(root.notebook_frames[1].heater_power_scale.get())   
-            root.notebook_frames[2].current_temperature_label.configure(text=f"Current temperature: {operators.T_2} °C")
-            root.notebook_frames[2].water_level_label.configure(text=f"Water level: {operators.V} m^3")
+            root.notebook_frames[2].current_temperature_out.configure(text=operators.temp)
+            root.notebook_frames[2].current_water_level_out.configure(text=operators.V)
 
         if ( tick_counter > 65000):
             tick_counter = 0
         
         # check if a other graph was selected, if so change displayed graph
-        graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0]
+        try:
+            graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0]
+        except:
+            pass
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
             if root.notebook_frames[3].graphs_list.get(graph_select_new) == "Water Temperature":
                 display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.temperatures)
@@ -331,6 +379,9 @@ def logic_thread(root):
 
             ms, sec, min = 0, 0, 0
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
+            root.notebook_frames[2].current_temperature_out.configure(text="---")
+            root.notebook_frames[2].current_water_level_out.configure(text="---")
+            scale_sample = []
 
             operators.resetoperator()
             operators.heatinginitialize(20, 1000)
@@ -387,7 +438,7 @@ def count_time(ms: int, sec: int, min: int, ms_incr: int = 0, sec_inc: int = 0, 
     ms -= d_ms * 1000
     sec += sec_inc + d_ms
     d_sec = sec // 60
-    ms -= d_sec * 60
+    sec -= d_sec * 60
     min += min_incr + d_sec
     return ms, sec, min
 
@@ -447,43 +498,69 @@ def select_invalid(root, input):
     for entry, i in zip(constants.entries_tuple, range(len(constants.entries_tuple) + 1)):
         root.nametowidget(entry).configure(background=constants.entry_background_color if input[i] is None else '#FF0000')
 
-def validate_inputs(root):
-    bad = []
-    data = []
-    print(f"root: {root}")
-    print(f"entry: {root.nametowidget(constants.SAMPLES_ENTRY)}")
-    data.append(root.nametowidget(constants.SAMPLES_ENTRY).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,3}$", min = 1, max = 100), constants.SAMPLES_ENTRY))
+# search recursively Frame widget and return list of tkinter Entry instances present in given Frame
+def rsearch_forentry(widget):
+    widgets_list = widget.winfo_children()
+    found_entries = []
+    for w in widgets_list:
+        if w.__class__.__name__ == "Frame":
+            # search deeper if Frame found
+            temp = rsearch_forentry(w)
+            if temp is not None:
+                found_entries = [*found_entries, *temp]
+        elif w.__class__.__name__ == "Entry":
+            # append Entry instance when found
+            found_entries.append(w)
 
-    data.append(root.nametowidget(constants.WATER_ITEMP).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,2}$", min = 0, max = 90), constants.WATER_ITEMP))
+    # return list of found Entries, if empty return None
+    return found_entries if len(found_entries) else None
 
-    data.append(root.nametowidget(constants.WATER_TTEMP).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,3}$", min = 40, max = 100), constants.WATER_TTEMP))
+def restore_widget_path(root, widget):
+    widgets_list = root.winfo_children()
+    path = ""
+    print(f"{widget._name}: -\\")
+    for w in widgets_list:
+        print(w)
+        if w is widget:
+            return w._name
+        if w.__class__.__name__ == "Frame":
+            temp = restore_widget_path(root, w)
+            if temp is not None:
+                path += '.' + temp
 
-    data.append(root.nametowidget(constants.BOILER_HEIGHT).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,3}$", min = 1, max = 150), constants.BOILER_HEIGHT))
+    return path if len(path) else None
+# encountered such problem:
+# frame: SimulationFrame
+# samples_entry: None
+# samples_entry: -\
+# .!simulationframe.!label
+# .!simulationframe.!button
+# .!simulationframe.!button2
+# .!simulationframe.!button3
+# .!simulationframe.!button4
+# .!simulationframe.!label2
+# .!simulationframe.!label3
+# .!simulationframe.samples_entry
+# restore_widget_path(entry): samples_entry
+# frame: InputsFrame
+# water_initial_temperature_entry: None
+# water_initial_temperature_entry: -\
+# .!inputsframe.!label
+# .!inputsframe.!frame
+# !frame: -\
+# .!inputsframe.!label
+# .!inputsframe.!frame
+# restore_widget_path(entry): .!frame
 
-    data.append(root.nametowidget(constants.BOILER_WIDTH).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,3}$", min = 1, max = 150), constants.BOILER_WIDTH))
-
-    data.append(root.nametowidget(constants.BOILER_DEPTH).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,3}$", min = 1, max = 150), constants.BOILER_DEPTH))
-
-    data.append(root.nametowidget(constants.HEATER_EFFICIENCY).get())
-    bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,2}$", min = 0, max = 90), constants.HEATER_EFFICIENCY))
-
-
-    if bad[-2] is None and bad[-3] is None and bad[-4] is None:
-        data.append(root.nametowidget(constants.WATER_AMOUNT).get())
-        bad.append(return_if_bad(is_valid(data[-1], "^[0-9]{1,2}$", min = 1, max = (data[-2] * data[-3] * data[-4])), constants.WATER_AMOUNT))
-
-
-    if any(bad):
-        return True, bad
-    else:
-        return False, data
- 
+def inputs_validator(root, entries):
+    # name = constants.SAMPLES_ENTRY
+    # value = self.nametowidget(name).get()
+    # data.append((name, value, is_valid(value, "^[0-9]{1,3}$", min = 1, max = 100)))
+    for entry in entries:
+        name = entry._name
+        #value = getattr(root, restore_widget_path(entry)).get()
+        print(f"{name}: {None}")
+        print(f"restore_widget_path(entry): {restore_widget_path(root, entry)}")
 
 if __name__ == "__main__":
     main = MainWindow()
