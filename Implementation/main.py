@@ -93,6 +93,11 @@ class MainWindow(tk.Tk):
                 "configure": {
                     "font": ("Consolas", 10, "bold")
                 }
+            },
+            "pstates.TFrame": {
+                "configure": {
+                    "background": "#999999"
+                }
             }
             })
         
@@ -180,6 +185,18 @@ class SimulationFrame(tk.Frame):
 
         ttk.Label(self, text="Sample rate: \t samples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
         my_Entry(self, width=3, name=constants.SAMPLES_ENTRY, font= ("Consolas", 10, "bold")).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
+
+        self.process_states_board_frame = ttk.Frame(self, style="pstates.TFrame")
+        self.process_states_board_frame.grid(column=4, row=0, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
+        ttk.Label(self.process_states_board_frame, text="Process states:", background="#999999").grid(column=0, row=0, padx=(10, 0), pady=(10, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_run", background="#999999", font=(20)).grid(column=0, row=1, padx=(40, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="RUN", background="#999999").grid(column=1, row=1, padx=(0, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_fill", background="#999999", font=(20)).grid(column=0, row=2, padx=(40, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Boiler fill", background="#999999").grid(column=1, row=2, padx=(0, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_drain", background="#999999", font=(20)).grid(column=0, row=3, padx=(40, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Boiler draining", background="#999999").grid(column=1, row=3, padx=(0, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_heat", background="#999999", font=(20)).grid(column=0, row=4, padx=(40, 0), pady=(0, 10), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Heating", background="#999999").grid(column=1, row=4, padx=(0, 20), pady=(0, 10), sticky=tk.W)
 
     def start(self):
         self.simulation_state = constants.RUNNING
@@ -352,16 +369,24 @@ def logic_thread(root):
         simulation_new_state = root.notebook_frames[0].simulation_state
 
         # validate entered values upon simulator start
-        if ( simulation_new_state in (constants.RUNNING, constants.REWIND) and simulation_old_state == constants.STOPPED ):
-            for frame in root.notebook_frames:
-                entry_widgets = rsearch_forentry(frame)
-                if entry_widgets is not None:
-                    invalid, data = inputs_validator(frame, entry_widgets)
-                    select_invalid(root, data)
-                    if invalid:
-                        root.notebook_frames[0].restart()
-                        root.notebook_frames[0].simulation_state = constants.STOPPED
-                        simulation_new_state = constants.STOPPED
+        if ( simulation_new_state in (constants.RUNNING, constants.REWIND) ):
+            if simulation_old_state == constants.PAUSED:
+                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
+            elif simulation_old_state == constants.STOPPED:
+                all_valid = True
+                for frame in root.notebook_frames:
+                    entry_widgets = rsearch_forentry(frame)
+                    if entry_widgets is not None:
+                        invalid, data = inputs_validator(frame, entry_widgets)
+                        select_invalid(root, data)
+                        if invalid:
+                            all_valid = False
+                if all_valid:
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
+                else:
+                    root.notebook_frames[0].restart()
+                    root.notebook_frames[0].simulation_state = constants.STOPPED
+                    simulation_new_state = constants.STOPPED
 
 
         if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.RUNNING):
@@ -396,6 +421,8 @@ def logic_thread(root):
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
             root.notebook_frames[2].current_temperature_out.configure(text="---")
             root.notebook_frames[2].current_water_level_out.configure(text="---")
+            root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+
             scale_sample = []
 
             operators.resetoperator()
@@ -422,6 +449,10 @@ def logic_thread(root):
                 root.notebook.tab(1, state=tk.NORMAL)
                 root.notebook.tab(2, state=tk.NORMAL)
                 root.notebook.tab(3, state=tk.NORMAL)
+                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+
+        if ( simulation_new_state == constants.PAUSED and simulation_old_state in (constants.RUNNING, constants.REWIND) ):
+            root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
 
         tick_counter += 1
         

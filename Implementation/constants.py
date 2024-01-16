@@ -3,7 +3,7 @@ if __name__ == "__main__":
 
 window_width = 1250                             #  width of the window, can be changed if desired, be aware of layout misplace wheen changing width or height value
 window_height = 750                             #  height of the window
-window_background_color = "#BBBBBB"             # some random background color, can be changed if desired
+window_background_color = "#BBBBBB"             #  some random background color, can be changed if desired
 entry_background_color = "#AAAAAA"
 
 simulation_tick = 10                            # ms, amount of time for one tick of simulation
@@ -34,7 +34,7 @@ entries_validation_dict = {
     SAMPLES_ENTRY: {
         "format": "^[0-9]{1,3}$",
         "min": 1,
-        "max": 100
+        "max": 1000//simulation_tick
     },
     WATER_ITEMP: {
         "format": "^[0-9]{1,2}$",
