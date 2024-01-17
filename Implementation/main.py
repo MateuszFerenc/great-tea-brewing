@@ -217,6 +217,9 @@ class SimulationFrame(tk.Frame):
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.DISABLED)
         self.rewind_button.configure(state=tk.ACTIVE)
+        self.parent.notebook.tab(1, state=tk.NORMAL)
+        self.parent.notebook.tab(2, state=tk.NORMAL)
+        self.parent.notebook.tab(3, state=tk.NORMAL)
 
     def rewind(self):
         self.simulation_state = constants.REWIND
@@ -265,17 +268,27 @@ class InputsFrame(tk.Frame):
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=8, row=0, padx=(0, 0), sticky=tk.NSEW)
         boiler_dimensions_frame.grid(column=1, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
 
-        ttk.Label(self, text="Heater power: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.heater_power_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.heater_power_scale.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self, text="Heater temperature setpoint: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        heater_setpoint_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        heater_setpoint_frame.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
+        self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 150, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.heater_power_scale.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_setpoint_frame, text="°C").grid(column=1, row=0, sticky=tk.N)
 
-        ttk.Label(self, text="Pouring water in flow level: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.water_in_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.water_in_scale.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self, text="Pouring water in flow: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        water_intake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        water_intake_frame.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
+        self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=0, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.water_in_scale.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_intake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
-        ttk.Label(self, text="Pouring water out flow level: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        self.water_out_scale=tk.Scale(self, orient="horizontal", cursor="plus", from_=500, to= 10000, length = 400, resolution = 100, background=constants.window_background_color, highlightthickness=0)
-        self.water_out_scale.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
+
+        ttk.Label(self, text="Pouring water out flow: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        water_outtake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        water_outtake_frame.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
+        self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=0, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.water_out_scale.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
         ttk.Label(self, text="Heater Efficiency: ").grid(column=0, row=7, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_efficiency_frame = ttk.Frame(self, style="LitteFrame.TFrame")
@@ -288,6 +301,18 @@ class InputsFrame(tk.Frame):
         water_amount_frame.grid(column=1, row=8, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Intake valve flow capacity: ").grid(column=0, row=9, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        invalve_cap_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        invalve_cap_frame.grid(column=1, row=9, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(invalve_cap_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(invalve_cap_frame, text="L/s").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Outtake valve flow capacity: ").grid(column=0, row=10, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        outvalve_cap_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        outvalve_cap_frame.grid(column=1, row=10, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(outvalve_cap_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(outvalve_cap_frame, text="L/s").grid(column=1, row=0, sticky=tk.NSEW)
 
 
 class OutputsFrame(tk.Frame):
@@ -314,6 +339,27 @@ class OutputsFrame(tk.Frame):
         self.current_water_level_out = ttk.Label(water_lvl_frame, text="---")
         self.current_water_level_out.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_lvl_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Heater power: ").grid(column=0, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
+        heater_power_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        heater_power_frame.grid(column=1, row=2, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        self.current_heater_power_out = ttk.Label(heater_power_frame, text="---")
+        self.current_heater_power_out.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_power_frame, text="W").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Water intake: ").grid(column=0, row=3, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
+        water_intake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        water_intake_frame.grid(column=1, row=3, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        self.current_water_intake_out = ttk.Label(water_intake_frame, text="---")
+        self.current_water_intake_out.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_intake_frame, text="L/s").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Water outake: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
+        water_outtake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        water_outtake_frame.grid(column=1, row=4, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        self.current_water_outtake_out = ttk.Label(water_outtake_frame, text="---")
+        self.current_water_outtake_out.grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_outtake_frame, text="L/s").grid(column=1, row=0, sticky=tk.NSEW)
 
 class GraphsFrame(tk.Frame):
     def __init__(self, parent):
@@ -360,7 +406,7 @@ def logic_thread(root):
     ms, sec, min = 0, 0, 0
     
     operators = functions.Functions(simulation_sampling_rate, 1000)
-    root.notebook_frames[1].heater_power_scale.set(2000)
+    root.notebook_frames[1].heater_power_scale.set(100)
     operators.heatinginitialize(20, 1000)
     scale_sample = []
 
@@ -446,9 +492,6 @@ def logic_thread(root):
             else:
                 root.notebook_frames[0].simulation_state = constants.STOPPED
                 root.notebook_frames[0].restart()
-                root.notebook.tab(1, state=tk.NORMAL)
-                root.notebook.tab(2, state=tk.NORMAL)
-                root.notebook.tab(3, state=tk.NORMAL)
                 root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
 
         if ( simulation_new_state == constants.PAUSED and simulation_old_state in (constants.RUNNING, constants.REWIND) ):
