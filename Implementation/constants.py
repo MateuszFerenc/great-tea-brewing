@@ -28,6 +28,8 @@ BOILER_WIDTH = 'boiler_width_entry'
 BOILER_DEPTH = 'boiler_depth_entry'
 HEATER_EFFICIENCY = 'heater_efficiency_entry'
 WATER_AMOUNT = 'desired_water_amount_entry'
+INTAKE_FLOW = 'intake_valve_flow_entry'
+OUTTAKE_FLOW = 'outtake_valve_flow_entry'
 
 # available entries: format, min, max, float_type, time_type
 entries_validation_dict = {
@@ -70,6 +72,16 @@ entries_validation_dict = {
         "format": "^[0-9]+$",
         "min": 1,
         "max": 27000
+    },
+    INTAKE_FLOW: {
+        "format": "^[0-9]{1,2}$",
+        "min": 0,
+        "max": 2000
+    },
+    OUTTAKE_FLOW: {
+        "format": "^[0-9]{1,2}$",
+        "min": 0,
+        "max": 2000
     }
 }
 
@@ -80,3 +92,5 @@ entries_validation_dict[WATER_AMOUNT]["max"] = (
         entries_validation_dict[BOILER_DEPTH]["max"] 
         ) / 1000
 )
+
+# Add text labels here
