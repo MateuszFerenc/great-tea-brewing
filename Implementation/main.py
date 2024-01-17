@@ -298,14 +298,14 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Heater temperature setpoint: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_setpoint_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         heater_setpoint_frame.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
-        self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 150, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 150, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=15)
         self.heater_power_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_setpoint_frame, text="°C").grid(column=1, row=0, sticky=tk.N)
 
         ttk.Label(self, text="Pouring water in flow: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_intake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_intake_frame.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
-        self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=0, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=0, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_in_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_intake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
@@ -313,7 +313,7 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Pouring water out flow: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_outtake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_outtake_frame.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
-        self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=0, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"))
+        self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=0, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_out_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
@@ -439,7 +439,6 @@ class GraphsFrame(tk.Frame):
 sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match('.*Frame$', c))
 # create list of class types defined in this scope
 
-simulation_sampling_rate = constants.simulation_default_sampling
 
 def logic_thread(root):
     simulation_counter = 0
@@ -447,6 +446,9 @@ def logic_thread(root):
     simulation_old_state, simulation_new_state = constants.STOPPED, constants.STOPPED
     graph_select_old, graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0], root.notebook_frames[3].graphs_list.curselection()[0]
     ms, sec, min = 0, 0, 0
+
+    rewind_sleep = constants.simulation_rewind_delay
+    simulation_sampling_rate = constants.simulation_default_sampling
     
     operators = functions.Functions(simulation_sampling_rate, 1000)
     root.notebook_frames[1].heater_power_scale.set(100)
@@ -463,19 +465,41 @@ def logic_thread(root):
                 root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
             elif simulation_old_state == constants.STOPPED:
                 all_valid = True
+                data_all = {}
                 for frame in root.notebook_frames:
                     entry_widgets = rsearch_forentry(frame)
                     if entry_widgets is not None:
                         invalid, data = inputs_validator(frame, entry_widgets)
-                        select_invalid(root, data)
+                        data_all.update(data)
                         if invalid:
                             all_valid = False
-                if all_valid:
+                            
+                try:
+                    if not all_valid:
+                        raise Exception()
+                    water_amount = int(data_all[constants.WATER_AMOUNT][0])
+                    boiler_width = int(data_all[constants.BOILER_WIDTH][0])
+                    boiler_height = int(data_all[constants.BOILER_HEIGHT][0])
+                    boiler_depth = int(data_all[constants.BOILER_DEPTH][0])
+                    if water_amount > ( boiler_width * boiler_height * boiler_depth ) / 1000:
+                        data_all[constants.WATER_AMOUNT][1] = False
+                        raise Exception()
+
+                    if simulation_new_state == constants.RUNNING:   # REALTIME run mode
+                        simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
+                        operators.update_dtime(simulation_sampling_rate)
+                    else:   # REWIND run mode
+                        operators.update_dtime(rewind_sleep*100000)
+
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
-                else:
+
+                except Exception as e:
                     root.notebook_frames[0].restart()
                     root.notebook_frames[0].simulation_state = constants.STOPPED
                     simulation_new_state = constants.STOPPED
+
+                finally:
+                    select_invalid(root, data_all)
 
 
         if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.RUNNING):
@@ -536,6 +560,7 @@ def logic_thread(root):
                 root.notebook_frames[0].simulation_state = constants.STOPPED
                 root.notebook_frames[0].restart()
                 root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+            sleep(rewind_sleep/1000000)
 
         if ( simulation_new_state == constants.PAUSED and simulation_old_state in (constants.RUNNING, constants.REWIND) ):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
@@ -639,8 +664,8 @@ def return_if_bad(is_valid: bool, input_name: str):
 
 # Marks invalid fields with red background
 def select_invalid(root, input):
-    for epath, value, valid in input:
-        root.nametowidget(epath).style.configure(str(epath).split(".")[-1] + ".TEntry", fieldbackground=constants.entry_background_color if valid is True else '#FF0000')
+    for name in input.keys():
+        root.nametowidget(input[name][2]).style.configure(str(input[name][2]).split(".")[-1] + ".TEntry", fieldbackground=constants.entry_background_color if input[name][1] is True else '#FF0000')
 
 # search recursively Frame widget and return list of tkinter Entry instances present in given Frame
 def rsearch_forentry(widget):
@@ -660,17 +685,18 @@ def rsearch_forentry(widget):
     return found_entries if len(found_entries) else None
 
 def inputs_validator(root, entries):
-    data = []
+    data = {}
     invalid_amount = 0
 
     for entry in entries:
         name = entry._name
         value = root.nametowidget(".".join(str(entry).split(".")[2:])).get()
-        data.append((entry, value, unpack_isvalid(value, constants.entries_validation_dict[name])))
-        if not data[-1][2]:
+        data[name] = [value, unpack_isvalid(value, constants.entries_validation_dict[name]), entry]
+        if not data[name][1]:
             invalid_amount += 1
 
-    return invalid_amount, data     # return list of (entry_path, value, is_valid), ..., (entry_path, value, is_valid)
+    return invalid_amount, data     # return amount of invalid entries, dict of lists: name: (value, is_valid, raw_name), ..., name: (value, is_valid, raw_name)
+
 
 if __name__ == "__main__":
     main = MainWindow()

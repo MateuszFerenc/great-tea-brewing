@@ -36,6 +36,9 @@ class Functions:
         self.Time = 0
         self.dTime = round(1 / sample_time, 4)
 
+    def update_dtime(self, sample_time):
+        self.dTime = round(1 / sample_time, 4)
+
     def append_sample(self) -> None:
         self.samples.append(self.Time)
         self.Time = round(self.Time + self.dTime, 2)
