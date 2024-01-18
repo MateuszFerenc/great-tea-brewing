@@ -240,9 +240,10 @@ class SimulationFrame(tk.Frame):
         self.start_button.configure(state=tk.DISABLED)
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.ACTIVE)
-        self.parent.notebook.tab(1, state=tk.DISABLED)
-        self.parent.notebook.tab(2, state=tk.DISABLED)
-        self.parent.notebook.tab(3, state=tk.DISABLED)
+        # restore upon release
+        # self.parent.notebook.tab(1, state=tk.DISABLED)
+        # self.parent.notebook.tab(2, state=tk.DISABLED)
+        # self.parent.notebook.tab(3, state=tk.DISABLED)
 
 
 class InputsFrame(tk.Frame):
@@ -523,6 +524,7 @@ def logic_thread(root):
 
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
                     operators.resetoperator()
+                    ms, sec, min = 0, 0, 0
 
                 except Exception as e:
                     print(e)
@@ -534,6 +536,9 @@ def logic_thread(root):
                     select_invalid(root, data_all)
             # remove upon release
             elif simulation_old_state == constants.SimulatorStates.READY:
+                ms, sec, min = 0, 0, 0
+                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
+                operators.resetoperator()
                 operators.pouringinitialize(0, int(data_all[constants.WATER_AMOUNT][0]), 1, 1)
                 operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
                 if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
@@ -541,7 +546,7 @@ def logic_thread(root):
                     operators.update_dtime(simulation_sampling_rate)
                     simulation_sleep = constants.simulation_tick / 1000
                 else:   # REWIND run mode
-                    operators.update_dtime(1000)
+                    operators.update_dtime(constants.simulation_rewind_delay * 100000)
                     simulation_sleep = constants.simulation_rewind_delay / 1000000
 
         # make sample every simulation loop iteration, calculate relation sample time to simulation tick
@@ -574,12 +579,16 @@ def logic_thread(root):
         if simulation_new_state == constants.SimulatorStates.RESTART:
             root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
             simulation_new_state = constants.SimulatorStates.STOPPED
+            process_state = constants.ProcessStates.IDLE
 
             ms, sec, min = 0, 0, 0
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
             root.notebook_frames[2].current_temperature_out.configure(text="---")
             root.notebook_frames[2].current_water_level_out.configure(text="---")
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+            root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='black')
+            root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='black')
+            root.notebook_frames[0].process_states_board_frame.nametowidget("ps_heat").configure(foreground='black')
 
             simulation_sleep = constants.simulation_tick / 1000
 
@@ -595,15 +604,20 @@ def logic_thread(root):
             if process_state == constants.ProcessStates.IDLE:
                 # change process state to FILLING
                 process_state = constants.ProcessStates.FILLING
+                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='red')
             elif process_state == constants.ProcessStates.FILLING:
                 if operators.water_reached_target():
                     process_state = constants.ProcessStates.HEATING
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_heat").configure(foreground='red')
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='black')
                 else:
                     # pour water into boiler until target water amount is not reached
                     operators.pouringwater()
             elif process_state == constants.ProcessStates.HEATING:
                 if operators.temp_reached_target():
                     process_state = constants.ProcessStates.DRAINING
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='red')
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_heat").configure(foreground='black')
                 else:
                     # heat up water until target temperature is not reached
                     operators.heatingupwater()
@@ -614,6 +628,8 @@ def logic_thread(root):
                     root.notebook_frames[0].restart()
                     root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='black')
+                    simulation_sleep = constants.simulation_tick / 1000
                 else:
                     # drain water from the boiler, until it's empty
                     operators.drainingwater()

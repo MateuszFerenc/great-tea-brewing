@@ -9,7 +9,7 @@ entry_background_color = "#AAAAAA"
 simulation_tick = 10                            # ms, amount of time for one tick of simulation
 simulation_default_sampling = 10                # samples per second, 1000 ms / sampling = one sample time (ms) [1000ms/5=200ms => 200ms/10ms=20 simulation ticks per sample]
 graph_update_time = 500                         # ms, amount of time before next plot (graph) update
-simulation_rewind_delay = 10*40000                    # us, amount of time to sleep in loop during rewind mode
+simulation_rewind_delay = 10                    # us, amount of time to sleep in loop during rewind mode
 assert type(simulation_default_sampling) is int
 assert type(simulation_tick) is int
 assert (1000/simulation_default_sampling) >= simulation_tick
