@@ -9,18 +9,37 @@ entry_background_color = "#AAAAAA"
 simulation_tick = 10                            # ms, amount of time for one tick of simulation
 simulation_default_sampling = 10                # samples per second, 1000 ms / sampling = one sample time (ms) [1000ms/5=200ms => 200ms/10ms=20 simulation ticks per sample]
 graph_update_time = 500                         # ms, amount of time before next plot (graph) update
-simulation_rewind_delay = 10                    # us, amount of time to sleep in loop during rewind mode
+simulation_rewind_delay = 10*40000                    # us, amount of time to sleep in loop during rewind mode
 assert type(simulation_default_sampling) is int
 assert type(simulation_tick) is int
 assert (1000/simulation_default_sampling) >= simulation_tick
 
-plot_names = ("Water Temperature", "Heater Power")
-RUNNING = 'running'
-STOPPED = 'stopped'
-PAUSED = 'paused'
-REWIND = 'rewind'
-RESTART = 'restart'
+# names of the plots
+plot_names = {
+    "water_temp": "Water Temperature", 
+    "heat_pwr": "Heater Power", 
+    "water_lvl": "Water Level"
+    }
 
+# simulator states
+class SimulatorStates:
+    RUNNING = 'running'
+    STOPPED = 'stopped'
+    PAUSED = 'paused'
+    REWIND = 'rewind'
+    RESTART = 'restart'
+    DATA = 'data'       # temporally, remove upon release
+    READY = 'ready'     # temporally, remove upon release
+
+# process states
+class ProcessStates:
+    IDLE = 0
+    FILLING = 1
+    HEATING = 2
+    DRAINING = 3
+
+
+# entry names
 SAMPLES_ENTRY = 'samples_entry'
 WATER_ITEMP = 'water_initial_temperature_entry'
 WATER_TTEMP = 'water_target_temperature_entry'
@@ -31,6 +50,8 @@ HEATER_EFFICIENCY = 'heater_efficiency_entry'
 WATER_AMOUNT = 'desired_water_amount_entry'
 INTAKE_FLOW = 'intake_valve_flow_entry'
 OUTTAKE_FLOW = 'outtake_valve_flow_entry'
+
+
 
 # available entries: format, min, max, float_type, time_type
 entries_validation_dict = {

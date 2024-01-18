@@ -137,7 +137,7 @@ class SimulationFrame(tk.Frame):
         self.parent = parent
         self.configure(background=constants.window_background_color)
 
-        self.simulation_state = constants.STOPPED
+        self.simulation_state = constants.SimulatorStates.STOPPED
         
         self.create_ui()
 
@@ -195,31 +195,38 @@ class SimulationFrame(tk.Frame):
 
         self.process_states_board_frame = ttk.Frame(self, style="pstates.TFrame")
         self.process_states_board_frame.grid(column=4, row=0, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
-        ttk.Label(self.process_states_board_frame, text="Process states:", background="#999999").grid(column=0, row=0, padx=(10, 0), pady=(10, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="●", name="ps_run", background="#999999", font=(20)).grid(column=0, row=1, padx=(40, 0), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="RUN", background="#999999").grid(column=1, row=1, padx=(0, 20), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="●", name="ps_fill", background="#999999", font=(20)).grid(column=0, row=2, padx=(40, 0), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="Boiler fill", background="#999999").grid(column=1, row=2, padx=(0, 20), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="●", name="ps_drain", background="#999999", font=(20)).grid(column=0, row=3, padx=(40, 0), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="Boiler draining", background="#999999").grid(column=1, row=3, padx=(0, 20), pady=(0, 0), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="●", name="ps_heat", background="#999999", font=(20)).grid(column=0, row=4, padx=(40, 0), pady=(0, 10), sticky=tk.W)
-        ttk.Label(self.process_states_board_frame, text="Heating", background="#999999").grid(column=1, row=4, padx=(0, 20), pady=(0, 10), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Process states:", background="#999999").grid(column=0, row=0, columnspan=2, padx=(10, 0), pady=(10, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_run", background="#999999", font=(20)).grid(column=0, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="RUN", background="#999999").grid(column=1, row=1, padx=(10, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_fill", background="#999999", font=(20)).grid(column=0, row=2, padx=(20, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Boiler fill", background="#999999").grid(column=1, row=2, padx=(10, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_drain", background="#999999", font=(20)).grid(column=0, row=3, padx=(20, 0), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Boiler draining", background="#999999").grid(column=1, row=3, padx=(10, 20), pady=(0, 0), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="●", name="ps_heat", background="#999999", font=(20)).grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.W)
+        ttk.Label(self.process_states_board_frame, text="Heating", background="#999999").grid(column=1, row=4, padx=(10, 20), pady=(0, 10), sticky=tk.W)
+
+        # temporally, remove upon release
+        self.temporary_button = ttk.Button(self.process_states_board_frame, text="Fill test data", command=self.fill_test_data)
+        self.temporary_button.grid(column=0, row=5, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
+
+    def fill_test_data(self):   # temporally, remove upon release
+        self.simulation_state = constants.SimulatorStates.DATA
 
     def start(self):
-        self.simulation_state = constants.RUNNING
+        self.simulation_state = constants.SimulatorStates.RUNNING
         self.start_button.configure(state=tk.DISABLED)
         self.pause_button.configure(state=tk.ACTIVE)
         self.restart_button.configure(state=tk.ACTIVE)
         self.rewind_button.configure(state=tk.DISABLED)
 
     def pause(self):
-        self.simulation_state = constants.PAUSED
+        self.simulation_state = constants.SimulatorStates.PAUSED
         self.start_button.configure(state=tk.ACTIVE)
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.ACTIVE)
 
     def restart(self):
-        self.simulation_state = constants.RESTART
+        self.simulation_state = constants.SimulatorStates.RESTART
         self.start_button.configure(state=tk.ACTIVE)
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.DISABLED)
@@ -229,7 +236,7 @@ class SimulationFrame(tk.Frame):
         self.parent.notebook.tab(3, state=tk.NORMAL)
 
     def rewind(self):
-        self.simulation_state = constants.REWIND
+        self.simulation_state = constants.SimulatorStates.REWIND
         self.start_button.configure(state=tk.DISABLED)
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.ACTIVE)
@@ -415,7 +422,7 @@ class GraphsFrame(tk.Frame):
         self.create_ui()
 
     def create_ui(self):
-        dir_var = tk.Variable(value=constants.plot_names)
+        dir_var = tk.Variable(value=list(constants.plot_names.values()))
         self.graphs_list = tk.Listbox(self, listvariable=dir_var, height=6, width=30, selectmode=tk.SINGLE,
                                       background=constants.window_background_color, font=("Consolas", 10, "bold"),
                                       selectbackground="#999999")
@@ -443,27 +450,44 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 def logic_thread(root):
     simulation_counter = 0
     tick_counter = 0
-    simulation_old_state, simulation_new_state = constants.STOPPED, constants.STOPPED
+    simulation_old_state, simulation_new_state = constants.SimulatorStates.STOPPED, constants.SimulatorStates.STOPPED
     graph_select_old, graph_select_new = root.notebook_frames[3].graphs_list.curselection()[0], root.notebook_frames[3].graphs_list.curselection()[0]
     ms, sec, min = 0, 0, 0
+    data_all = {}
+    simulation_sleep = 0.01
 
-    rewind_sleep = constants.simulation_rewind_delay
+    process_state = constants.ProcessStates.IDLE
+
     simulation_sampling_rate = constants.simulation_default_sampling
     
-    operators = functions.Functions(simulation_sampling_rate, 1000)
+    operators = functions.Functions()
     root.notebook_frames[1].heater_power_scale.set(100)
-    operators.heatinginitialize(20, 1000)
     scale_sample = []
 
     while 1:
         simulation_old_state = simulation_new_state
         simulation_new_state = root.notebook_frames[0].simulation_state
 
+        # temporally, remove upon release
+        if simulation_new_state == constants.SimulatorStates.DATA:
+            data_all = {
+                'samples_entry': ['5', True, "<__main__.my_Entry object .!simulationframe.samples_entry>"], 
+                'water_initial_temperature_entry': ['25', True, "<__main__.my_Entry object .!inputsframe.!frame.water_initial_temperature_entry>"], 
+                'water_target_temperature_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame2.water_target_temperature_entry>"], 
+                'boiler_height_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame3.boiler_height_entry>"], 
+                'boiler_width_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame3.boiler_width_entry>"], 
+                'boiler_depth_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame3.boiler_depth_entry>"], 
+                'heater_efficiency_entry': ['99', True, "<__main__.my_Entry object .!inputsframe.!frame7.heater_efficiency_entry>"],
+                'desired_water_amount_entry': ['200', True, "<__main__.my_Entry object .!inputsframe.!frame8.desired_water_amount_entry>"],
+                'intake_valve_flow_entry': ['10', True, "<__main__.my_Entry object .!inputsframe.!frame9.intake_valve_flow_entry>"],
+                'outtake_valve_flow_entry': ['10', True, "<__main__.my_Entry object .!inputsframe.!frame10.outtake_valve_flow_entry>"]}
+            root.notebook_frames[0].simulation_state = constants.SimulatorStates.READY            
+
         # validate entered values upon simulator start
-        if ( simulation_new_state in (constants.RUNNING, constants.REWIND) ):
-            if simulation_old_state == constants.PAUSED:
+        if ( simulation_new_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND) ):
+            if simulation_old_state == constants.SimulatorStates.PAUSED:
                 root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
-            elif simulation_old_state == constants.STOPPED:
+            elif simulation_old_state == constants.SimulatorStates.STOPPED:
                 all_valid = True
                 data_all = {}
                 for frame in root.notebook_frames:
@@ -477,32 +501,51 @@ def logic_thread(root):
                 try:
                     if not all_valid:
                         raise Exception()
-                    water_amount = int(data_all[constants.WATER_AMOUNT][0])
+                    
+                    desired_water = int(data_all[constants.WATER_AMOUNT][0])
                     boiler_width = int(data_all[constants.BOILER_WIDTH][0])
                     boiler_height = int(data_all[constants.BOILER_HEIGHT][0])
                     boiler_depth = int(data_all[constants.BOILER_DEPTH][0])
-                    if water_amount > ( boiler_width * boiler_height * boiler_depth ) / 1000:
+                    if desired_water > ( boiler_width * boiler_height * boiler_depth ) / 1000:
                         data_all[constants.WATER_AMOUNT][1] = False
                         raise Exception()
+                    
+                    operators.pouringinitialize(0, desired_water, 1, 1)
+                    operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
 
-                    if simulation_new_state == constants.RUNNING:   # REALTIME run mode
+                    if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
                         simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
                         operators.update_dtime(simulation_sampling_rate)
+                        simulation_sleep = constants.simulation_tick / 1000
                     else:   # REWIND run mode
-                        operators.update_dtime(rewind_sleep*100000)
+                        operators.update_dtime(constants.simulation_rewind_delay * 100000)
+                        simulation_sleep = constants.simulation_rewind_delay / 1000000
 
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
+                    operators.resetoperator()
 
                 except Exception as e:
+                    print(e)
                     root.notebook_frames[0].restart()
-                    root.notebook_frames[0].simulation_state = constants.STOPPED
-                    simulation_new_state = constants.STOPPED
+                    root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
+                    simulation_new_state = constants.SimulatorStates.STOPPED
 
                 finally:
                     select_invalid(root, data_all)
+            # remove upon release
+            elif simulation_old_state == constants.SimulatorStates.READY:
+                operators.pouringinitialize(0, int(data_all[constants.WATER_AMOUNT][0]), 1, 1)
+                operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
+                if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
+                    simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
+                    operators.update_dtime(simulation_sampling_rate)
+                    simulation_sleep = constants.simulation_tick / 1000
+                else:   # REWIND run mode
+                    operators.update_dtime(1000)
+                    simulation_sleep = constants.simulation_rewind_delay / 1000000
 
-
-        if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.RUNNING):
+        # make sample every simulation loop iteration, calculate relation sample time to simulation tick
+        if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.SimulatorStates.RUNNING):
             simulation_counter = 0
             operators.append_sample()
             operators.heatingupwater()
@@ -520,15 +563,17 @@ def logic_thread(root):
         except:
             pass
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
-            if root.notebook_frames[3].graphs_list.get(graph_select_new) == "Water Temperature":
+            if root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_temp']:
                 display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.temperatures)
-            elif root.notebook_frames[3].graphs_list.get(graph_select_new) == "Heater Power":
+            elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['heat_pwr']:
                 display_heater_power_graph(root.notebook_frames[3], operators.samples, scale_sample)
+            elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_lvl']:
+                display_water_level_graph(root.notebook_frames[3], operators.samples, operators.water_levels)
         graph_select_old = graph_select_new
 
-        if simulation_new_state == constants.RESTART:
-            root.notebook_frames[0].simulation_state = constants.STOPPED
-            simulation_new_state = constants.STOPPED
+        if simulation_new_state == constants.SimulatorStates.RESTART:
+            root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
+            simulation_new_state = constants.SimulatorStates.STOPPED
 
             ms, sec, min = 0, 0, 0
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
@@ -536,44 +581,61 @@ def logic_thread(root):
             root.notebook_frames[2].current_water_level_out.configure(text="---")
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
 
-            scale_sample = []
-
-            operators.resetoperator()
-            operators.heatinginitialize(20, 1000)
+            simulation_sleep = constants.simulation_tick / 1000
 
 
-        if simulation_new_state == constants.RUNNING:
+        if simulation_new_state == constants.SimulatorStates.RUNNING:
             ms, sec, min = count_time(ms, sec, min, ms_incr=constants.simulation_tick)
             simulation_counter += constants.simulation_tick
 
-        if simulation_new_state != constants.REWIND:
-            if simulation_new_state == constants.RUNNING:
-                root.notebook_frames[0].timer_label.configure(text=f"Time: {min:003n} min {sec:02n} s {ms:003n} ms")
-
-            sleep(constants.simulation_tick/1000)
-        else:
-            #rewind
-            if not operators.temp_reached_target():
-                operators.append_sample()
-                operators.heatingupwater()
-            else:
-                root.notebook_frames[0].simulation_state = constants.STOPPED
-                root.notebook_frames[0].restart()
-                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
-            sleep(rewind_sleep/1000000)
-
-        if ( simulation_new_state == constants.PAUSED and simulation_old_state in (constants.RUNNING, constants.REWIND) ):
+        if ( simulation_new_state == constants.SimulatorStates.PAUSED and simulation_old_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND) ):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
 
+        if simulation_new_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND):
+            if process_state == constants.ProcessStates.IDLE:
+                # change process state to FILLING
+                process_state = constants.ProcessStates.FILLING
+            elif process_state == constants.ProcessStates.FILLING:
+                if operators.water_reached_target():
+                    process_state = constants.ProcessStates.HEATING
+                else:
+                    # pour water into boiler until target water amount is not reached
+                    operators.pouringwater()
+            elif process_state == constants.ProcessStates.HEATING:
+                if operators.temp_reached_target():
+                    process_state = constants.ProcessStates.DRAINING
+                else:
+                    # heat up water until target temperature is not reached
+                    operators.heatingupwater()
+            elif process_state == constants.ProcessStates.DRAINING:
+                if operators.V == 0:
+                    # go into IDLE state after cycle is finished
+                    process_state = constants.ProcessStates.IDLE
+                    root.notebook_frames[0].restart()
+                    root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
+                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
+                else:
+                    # drain water from the boiler, until it's empty
+                    operators.drainingwater()
+
+            if simulation_new_state == constants.SimulatorStates.REWIND:
+                # rewind simulation mode
+                operators.append_sample()
+
+            else:   
+                # realtime simulation mode
+                root.notebook_frames[0].timer_label.configure(text=f"Time: {min:003n} min {sec:02n} s {ms:003n} ms")
+                
+        sleep(simulation_sleep)
         tick_counter += 1
         
 def display_water_temperature_graph(root, x_vals, y_vals):
     root.ax.clear()
     root.ax.plot(x_vals, y_vals, color="r")
     root.ax.set_ylim((0, 125))
-    root.ax.set_xlabel("time [s]")
+    root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("T [°C]")
-    root.ax.set_title(label="Water Temperature")
+    root.ax.set_title(label=constants.plot_names['water_temp'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
     #root.ax.legend()
     root.canvas.draw()
@@ -582,9 +644,20 @@ def display_heater_power_graph(root, x_vals, y_vals):
     root.ax.clear()
     root.ax.plot(x_vals, y_vals, color="r")
     root.ax.set_ylim((500, 10000))
-    root.ax.set_xlabel("time [s]")
+    root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("P [W]")
-    root.ax.set_title(label="Heater Power")
+    root.ax.set_title(label=constants.plot_names['heat_pwr'])
+    root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
+    #root.ax.legend()
+    root.canvas.draw()
+
+def display_water_level_graph(root, x_vals, y_vals):
+    root.ax.clear()
+    root.ax.plot(x_vals, y_vals, color="r")
+    root.ax.set_ylim((-1, max(y_vals)*1.2))
+    root.ax.set_xlabel("t [s]")
+    root.ax.set_ylabel("V [L]")
+    root.ax.set_title(label=constants.plot_names['water_lvl'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
     #root.ax.legend()
     root.canvas.draw()
