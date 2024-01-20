@@ -6,6 +6,7 @@ import constants
 import re
 from threading import Thread
 from time import sleep
+from os.path import join
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -138,37 +139,29 @@ class SimulationFrame(tk.Frame):
         self.configure(background=constants.window_background_color)
 
         self.simulation_state = constants.SimulatorStates.STOPPED
+
+        self.heater_image_last_state = 20
+        self.fill_image_last_state = 20
+        self.drain_image_last_state = 20
+        self.water_image_last_state = 20
         
         self.create_ui()
 
     def create_ui(self):
-        self.image1 = tk.StringVar(value='0.png')
-        self.image2 = tk.StringVar(value='1.png')
-        self.image3 = tk.StringVar(value='2.png')
-        self.image4 = tk.StringVar(value='3.png')
+        self.assets_directory = join('Assets', 'images')
 
+        self.heater_image_path = join(self.assets_directory, 'heater_temperature')
+        self.fill_image_path = join(self.assets_directory, 'pouring_in')
+        self.drain_image_path = join(self.assets_directory, 'pouring_out')
+        self.water_image_path = join(self.assets_directory, 'water_level')
 
-        self.image_paths = [self.image1, self.image2, self.image3, self.image4]
+        self.image_width = 800
+        self.image_height = 640
 
-        self.images = [Image.open(path.get()) for path in self.image_paths]
+        self.schematic = ttk.Label(self, image=None, borderwidth=1, relief='solid')
+        self.schematic.grid(column=0, row=0, columnspan=4, sticky=tk.N)
 
-        width, height = 800, 640       # 0.2 scale factor
-        self.images = [img.resize((width, height), Image.LANCZOS) for img in self.images]
-
-        # Create an empty image with an alpha channel
-        self.result_image = Image.new('RGBA', (width, height), (0, 0, 0, 0))
-
-        # Paste images onto the result image, considering alpha channel
-        positions = [(0, 0), (0, 0), (0, 0), (0, 0)]
-        for img, pos in zip(self.images, positions):
-            self.result_image.paste(img, pos, img)
-
-        # # Convert the result to Tkinter PhotoImage
-        self.tk_image = ImageTk.PhotoImage(self.result_image)
-
-        # Create label to display the overlaid image
-        self.display = ttk.Label(self, image=self.tk_image, borderwidth=1, relief='solid')
-        self.display.grid(column=0, row=0, columnspan=4, sticky=tk.N)
+        self.update_schematic()
 
 
         self.start_button = ttk.Button(self, text="Start", command=self.start)
@@ -244,6 +237,30 @@ class SimulationFrame(tk.Frame):
         # self.parent.notebook.tab(1, state=tk.DISABLED)
         # self.parent.notebook.tab(2, state=tk.DISABLED)
         # self.parent.notebook.tab(3, state=tk.DISABLED)
+
+    def update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
+        if any((heater_state != self.heater_image_last_state, fill_state != self.fill_image_last_state, 
+               drain_state != self.drain_image_last_state, water_state != self.water_image_last_state)):
+            self.heater_image_last_state = heater_state
+            self.fill_image_last_state = fill_state
+            self.drain_image_last_state = drain_state
+            self.water_image_last_state = water_state
+
+            heater_image = Image.open(join(self.heater_image_path, f'{heater_state}.png')).convert("RGBA").resize((self.image_width, self.image_height))
+            fill_image = Image.open(join(self.fill_image_path, f'{fill_state}.png')).convert("RGBA").resize((self.image_width, self.image_height))
+            drain_image = Image.open(join(self.drain_image_path, f'{drain_state}.png')).convert("RGBA").resize((self.image_width, self.image_height))
+            water_image = Image.open(join(self.water_image_path, f'{water_state}.png')).convert("RGBA").resize((self.image_width, self.image_height))
+
+            result_image = Image.new('RGBA', (self.image_width, self.image_height), (0, 0, 0, 0))
+
+            result_image.paste(heater_image, (0, 0), heater_image)
+            result_image.paste(fill_image, (0, 0), fill_image)
+            result_image.paste(drain_image, (0, 0), drain_image)
+            result_image.paste(water_image, (0, 0), water_image)
+
+            self.tk_image = ImageTk.PhotoImage(result_image)
+
+            self.schematic.configure(image=self.tk_image)
 
 
 class InputsFrame(tk.Frame):
@@ -462,8 +479,11 @@ def logic_thread(root):
     simulation_sampling_rate = constants.simulation_default_sampling
     
     operators = functions.Functions()
-    root.notebook_frames[1].heater_power_scale.set(100)
     scale_sample = []
+
+    root.notebook_frames[1].heater_power_scale.set(100)
+    root.notebook_frames[1].water_in_scale.set(50)
+    root.notebook_frames[1].water_out_scale.set(50)
 
     while 1:
         simulation_old_state = simulation_new_state
@@ -513,6 +533,8 @@ def logic_thread(root):
                     
                     operators.pouringinitialize(0, desired_water, 1, 1)
                     operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
+                    operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
+                    operators.update_heater(power=1000, heater_efficency=0.95, environment_temperature=25)
 
                     if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
                         simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
@@ -522,7 +544,6 @@ def logic_thread(root):
                         operators.update_dtime(constants.simulation_rewind_delay * 100000)
                         simulation_sleep = constants.simulation_rewind_delay / 1000000
 
-                    root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
                     operators.resetoperator()
                     ms, sec, min = 0, 0, 0
 
@@ -537,10 +558,13 @@ def logic_thread(root):
             # remove upon release
             elif simulation_old_state == constants.SimulatorStates.READY:
                 ms, sec, min = 0, 0, 0
-                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
+                
                 operators.resetoperator()
                 operators.pouringinitialize(0, int(data_all[constants.WATER_AMOUNT][0]), 1, 1)
                 operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
+                operators.update_boiler(int(data_all[constants.BOILER_WIDTH][0]), int(data_all[constants.BOILER_DEPTH][0]), int(data_all[constants.BOILER_HEIGHT][0]), heat_loss=0.05)
+                operators.update_heater(power=1000, heater_efficency=0.95, environment_temperature=25)
+
                 if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
                     simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
                     operators.update_dtime(simulation_sampling_rate)
@@ -601,9 +625,14 @@ def logic_thread(root):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
 
         if simulation_new_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND):
+            water_state = operators.return_in_range(operators.V, operators.boiler_volume)
+            fill_state = operators.return_in_range(root.notebook_frames[1].water_in_scale.get()/100, 1)
+            drain_state = operators.return_in_range(root.notebook_frames[1].water_out_scale.get()/100, 1)
+
             if process_state == constants.ProcessStates.IDLE:
                 # change process state to FILLING
                 process_state = constants.ProcessStates.FILLING
+                root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='red')
                 root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='red')
             elif process_state == constants.ProcessStates.FILLING:
                 if operators.water_reached_target():
@@ -613,6 +642,9 @@ def logic_thread(root):
                 else:
                     # pour water into boiler until target water amount is not reached
                     operators.pouringwater()
+                    # update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
+                    if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
+                        root.notebook_frames[0].update_schematic(water_state=water_state, fill_state=fill_state)
             elif process_state == constants.ProcessStates.HEATING:
                 if operators.temp_reached_target():
                     process_state = constants.ProcessStates.DRAINING
@@ -621,18 +653,26 @@ def logic_thread(root):
                 else:
                     # heat up water until target temperature is not reached
                     operators.heatingupwater()
+                    if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
+                        root.notebook_frames[0].update_schematic(water_state=water_state)
             elif process_state == constants.ProcessStates.DRAINING:
                 if operators.V == 0:
                     # go into IDLE state after cycle is finished
                     process_state = constants.ProcessStates.IDLE
+                    root.notebook_frames[0].update_schematic()
                     root.notebook_frames[0].restart()
                     root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
                     root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='black')
+                    root.notebook_frames[1].heater_power_scale.set(100)
+                    root.notebook_frames[1].water_in_scale.set(50)
+                    root.notebook_frames[1].water_out_scale.set(50)
                     simulation_sleep = constants.simulation_tick / 1000
                 else:
                     # drain water from the boiler, until it's empty
                     operators.drainingwater()
+                    if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
+                        root.notebook_frames[0].update_schematic(water_state=water_state, drain_state=drain_state)
 
             if simulation_new_state == constants.SimulatorStates.REWIND:
                 # rewind simulation mode

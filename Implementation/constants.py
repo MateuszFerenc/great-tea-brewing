@@ -96,12 +96,12 @@ entries_validation_dict = {
         "max": 27000
     },
     INTAKE_FLOW: {
-        "format": "^[0-9]{1,2}$",
+        "format": "^[0-9]{1,4}$",
         "min": 0,
         "max": 2000
     },
     OUTTAKE_FLOW: {
-        "format": "^[0-9]{1,2}$",
+        "format": "^[0-9]{1,4}$",
         "min": 0,
         "max": 2000
     }
