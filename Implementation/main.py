@@ -233,10 +233,9 @@ class SimulationFrame(tk.Frame):
         self.start_button.configure(state=tk.DISABLED)
         self.pause_button.configure(state=tk.DISABLED)
         self.restart_button.configure(state=tk.ACTIVE)
-        # restore upon release
-        # self.parent.notebook.tab(1, state=tk.DISABLED)
-        # self.parent.notebook.tab(2, state=tk.DISABLED)
-        # self.parent.notebook.tab(3, state=tk.DISABLED)
+        self.parent.notebook.tab(1, state=tk.DISABLED)
+        self.parent.notebook.tab(2, state=tk.DISABLED)
+        self.parent.notebook.tab(3, state=tk.DISABLED)
 
     def update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
         if any((heater_state != self.heater_image_last_state, fill_state != self.fill_image_last_state, 
@@ -323,14 +322,14 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Heater temperature setpoint: ").grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_setpoint_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         heater_setpoint_frame.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
-        self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 150, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=15)
+        self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 120, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=15)
         self.heater_power_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_setpoint_frame, text="°C").grid(column=1, row=0, sticky=tk.N)
 
         ttk.Label(self, text="Pouring water in flow: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_intake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_intake_frame.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
-        self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=0, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
+        self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=1, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_in_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_intake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
@@ -338,7 +337,7 @@ class InputsFrame(tk.Frame):
         ttk.Label(self, text="Pouring water out flow: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_outtake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
         water_outtake_frame.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
-        self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=0, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
+        self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=1, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_out_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
 
@@ -382,6 +381,19 @@ class InputsFrame(tk.Frame):
                                                 f"max: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(outvalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
 
+        ttk.Label(self, text="Heater maximum power: ").grid(column=0, row=11, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        heater_pow_frame = ttk.Frame(self, style="LitteFrame.TFrame")
+        heater_pow_frame.grid(column=1, row=11, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(heater_pow_frame, width=8, name=constants.HEATER_POWER, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_POWER, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.HEATER_POWER]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.HEATER_POWER]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_pow_frame, text="J").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="To get help on the acceptable values, click with the right mouse button on the desired entry.",
+                  foreground="#808080", cursor='question_arrow').grid(column=0, row=12, columnspan=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+
 
 class OutputsFrame(tk.Frame):
     def __init__(self, parent):
@@ -413,7 +425,7 @@ class OutputsFrame(tk.Frame):
         heater_power_frame.grid(column=1, row=2, padx=20, pady=(0, 10), sticky=tk.NSEW)
         self.current_heater_power_out = ttk.Label(heater_power_frame, text="---")
         self.current_heater_power_out.grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(heater_power_frame, text="W").grid(column=1, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_power_frame, text="J").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Water intake: ").grid(column=0, row=3, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
         water_intake_frame = ttk.Frame(self, style="LitteFrame.TFrame")
@@ -428,6 +440,9 @@ class OutputsFrame(tk.Frame):
         self.current_water_outtake_out = ttk.Label(water_outtake_frame, text="---")
         self.current_water_outtake_out.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_outtake_frame, text="L/s").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Displayed values may differ from actual in process values, due to sampling time.",
+                  foreground="#808080", cursor='question_arrow').grid(column=0, row=5, columnspan=10, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
 
 class GraphsFrame(tk.Frame):
     def __init__(self, parent):
@@ -499,9 +514,9 @@ def logic_thread(root):
                 'boiler_width_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame3.boiler_width_entry>"], 
                 'boiler_depth_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame3.boiler_depth_entry>"], 
                 'heater_efficiency_entry': ['99', True, "<__main__.my_Entry object .!inputsframe.!frame7.heater_efficiency_entry>"],
-                'desired_water_amount_entry': ['200', True, "<__main__.my_Entry object .!inputsframe.!frame8.desired_water_amount_entry>"],
-                'intake_valve_flow_entry': ['10', True, "<__main__.my_Entry object .!inputsframe.!frame9.intake_valve_flow_entry>"],
-                'outtake_valve_flow_entry': ['10', True, "<__main__.my_Entry object .!inputsframe.!frame10.outtake_valve_flow_entry>"]}
+                'desired_water_amount_entry': ['100', True, "<__main__.my_Entry object .!inputsframe.!frame8.desired_water_amount_entry>"],
+                'intake_valve_flow_entry': ['1000', True, "<__main__.my_Entry object .!inputsframe.!frame9.intake_valve_flow_entry>"],
+                'outtake_valve_flow_entry': ['1000', True, "<__main__.my_Entry object .!inputsframe.!frame10.outtake_valve_flow_entry>"]}
             root.notebook_frames[0].simulation_state = constants.SimulatorStates.READY            
 
         # validate entered values upon simulator start
@@ -531,21 +546,30 @@ def logic_thread(root):
                         data_all[constants.WATER_AMOUNT][1] = False
                         raise Exception()
                     
-                    operators.pouringinitialize(0, desired_water, 1, 1)
+                    water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
+                    water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
+                    
+                    operators.pouringinitialize(desired_water, water_Qin, water_Qout)
                     operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
                     operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
                     operators.update_heater(power=1000, heater_efficency=0.95, environment_temperature=25)
 
+                    scale_sample = []
+
+                    simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
+
                     if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
-                        simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
                         operators.update_dtime(simulation_sampling_rate)
                         simulation_sleep = constants.simulation_tick / 1000
                     else:   # REWIND run mode
                         operators.update_dtime(constants.simulation_rewind_delay * 100000)
                         simulation_sleep = constants.simulation_rewind_delay / 1000000
+                        root.config(cursor="watch")
 
                     operators.resetoperator()
                     ms, sec, min = 0, 0, 0
+
+                    root.config(cursor="watch")
 
                 except Exception as e:
                     print(e)
@@ -560,28 +584,38 @@ def logic_thread(root):
                 ms, sec, min = 0, 0, 0
                 
                 operators.resetoperator()
-                operators.pouringinitialize(0, int(data_all[constants.WATER_AMOUNT][0]), 1, 1)
+                water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
+                water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
+                    
+                desired_water = int(data_all[constants.WATER_AMOUNT][0])
+                operators.pouringinitialize(desired_water, water_Qin, water_Qout)
                 operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), root.notebook_frames[1].heater_power_scale.get())
                 operators.update_boiler(int(data_all[constants.BOILER_WIDTH][0]), int(data_all[constants.BOILER_DEPTH][0]), int(data_all[constants.BOILER_HEIGHT][0]), heat_loss=0.05)
                 operators.update_heater(power=1000, heater_efficency=0.95, environment_temperature=25)
+                scale_sample = []
+                simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
+                
 
                 if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
-                    simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
                     operators.update_dtime(simulation_sampling_rate)
                     simulation_sleep = constants.simulation_tick / 1000
                 else:   # REWIND run mode
-                    operators.update_dtime(constants.simulation_rewind_delay * 100000)
+                    # operators.update_dtime(constants.simulation_rewind_delay * 100000)
+                    operators.update_dtime(simulation_sampling_rate*constants.simulation_rewind_delay*10)
                     simulation_sleep = constants.simulation_rewind_delay / 1000000
+                    root.config(cursor="watch")
 
         # make sample every simulation loop iteration, calculate relation sample time to simulation tick
         if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.SimulatorStates.RUNNING):
             simulation_counter = 0
             operators.append_sample()
-            operators.heatingupwater()
-            operators.gettingpower(root.notebook_frames[1].heater_power_scale.get())
+
             scale_sample.append(root.notebook_frames[1].heater_power_scale.get())   
-            root.notebook_frames[2].current_temperature_out.configure(text=operators.temp)
-            root.notebook_frames[2].current_water_level_out.configure(text=operators.V)
+            root.notebook_frames[2].current_temperature_out.configure(text=operators.water_temp)
+            root.notebook_frames[2].current_water_level_out.configure(text=round(operators.V, 0))
+
+            operators.Q_in = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
+            operators.Q_out = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
 
         if ( tick_counter > 65000):
             tick_counter = 0
@@ -593,7 +627,7 @@ def logic_thread(root):
             pass
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
             if root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_temp']:
-                display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.temperatures)
+                display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.water_temperatures)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['heat_pwr']:
                 display_heater_power_graph(root.notebook_frames[3], operators.samples, scale_sample)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_lvl']:
@@ -606,6 +640,7 @@ def logic_thread(root):
             process_state = constants.ProcessStates.IDLE
 
             ms, sec, min = 0, 0, 0
+            scale_sample = []
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
             root.notebook_frames[2].current_temperature_out.configure(text="---")
             root.notebook_frames[2].current_water_level_out.configure(text="---")
@@ -613,6 +648,8 @@ def logic_thread(root):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='black')
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='black')
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_heat").configure(foreground='black')
+            root.config(cursor="")
+            root.notebook_frames[0].update_schematic()
 
             simulation_sleep = constants.simulation_tick / 1000
 
@@ -667,6 +704,7 @@ def logic_thread(root):
                     root.notebook_frames[1].heater_power_scale.set(100)
                     root.notebook_frames[1].water_in_scale.set(50)
                     root.notebook_frames[1].water_out_scale.set(50)
+                    root.config(cursor="")
                     simulation_sleep = constants.simulation_tick / 1000
                 else:
                     # drain water from the boiler, until it's empty
@@ -677,7 +715,6 @@ def logic_thread(root):
             if simulation_new_state == constants.SimulatorStates.REWIND:
                 # rewind simulation mode
                 operators.append_sample()
-
             else:   
                 # realtime simulation mode
                 root.notebook_frames[0].timer_label.configure(text=f"Time: {min:003n} min {sec:02n} s {ms:003n} ms")
@@ -687,35 +724,35 @@ def logic_thread(root):
         
 def display_water_temperature_graph(root, x_vals, y_vals):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r")
-    root.ax.set_ylim((0, 125))
+    root.ax.plot(x_vals, y_vals, color="r", label='current temperature')
+    root.ax.set_ylim((0, 160))
     root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("T [°C]")
     root.ax.set_title(label=constants.plot_names['water_temp'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
-    #root.ax.legend()
+    root.ax.legend()
     root.canvas.draw()
 
 def display_heater_power_graph(root, x_vals, y_vals):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r")
-    root.ax.set_ylim((500, 10000))
+    root.ax.plot(x_vals, y_vals, color="r", label='power setpoint')
+    root.ax.set_ylim((0, 100))
     root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("P [W]")
     root.ax.set_title(label=constants.plot_names['heat_pwr'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
-    #root.ax.legend()
+    root.ax.legend()
     root.canvas.draw()
 
 def display_water_level_graph(root, x_vals, y_vals):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r")
+    root.ax.plot(x_vals, y_vals, color="r", label='current water level')
     root.ax.set_ylim((-1, max(y_vals)*1.2))
     root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("V [L]")
     root.ax.set_title(label=constants.plot_names['water_lvl'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
-    #root.ax.legend()
+    root.ax.legend()
     root.canvas.draw()
 
 def count_time(ms: int, sec: int, min: int, ms_incr: int = 0, sec_inc: int = 0, min_incr: int = 0):

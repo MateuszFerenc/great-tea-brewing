@@ -50,6 +50,7 @@ HEATER_EFFICIENCY = 'heater_efficiency_entry'
 WATER_AMOUNT = 'desired_water_amount_entry'
 INTAKE_FLOW = 'intake_valve_flow_entry'
 OUTTAKE_FLOW = 'outtake_valve_flow_entry'
+HEATER_POWER = 'heater_power_entry'
 
 
 
@@ -104,6 +105,11 @@ entries_validation_dict = {
         "format": "^[0-9]{1,4}$",
         "min": 0,
         "max": 2000
+    },
+    HEATER_POWER: {
+        "format": "^[0-9]{3,5}$",
+        "min": 500,
+        "max": 10000
     }
 }
 
