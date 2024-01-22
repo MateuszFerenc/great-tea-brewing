@@ -9,16 +9,16 @@ entry_background_color = "#AAAAAA"
 simulation_tick = 10                            # ms, amount of time for one tick of simulation
 simulation_default_sampling = 10                # samples per second, 1000 ms / sampling = one sample time (ms) [1000ms/5=200ms => 200ms/10ms=20 simulation ticks per sample]
 graph_update_time = 500                         # ms, amount of time before next plot (graph) update
-simulation_rewind_delay = 10                    # us, amount of time to sleep in loop during rewind mode
+simulation_rewind_delay = 1                    # us, amount of time to sleep in loop during rewind mode
 assert type(simulation_default_sampling) is int
 assert type(simulation_tick) is int
 assert (1000/simulation_default_sampling) >= simulation_tick
 
 # names of the plots
 plot_names = {
-    "water_temp": "Water Temperature", 
-    "heat_pwr": "Heater Power", 
-    "water_lvl": "Water Level"
+    "water_temp": "Water temperature", 
+    "heat_pwr": "Heater power", 
+    "water_lvl": "Water level"
     }
 
 # simulator states
@@ -107,9 +107,9 @@ entries_validation_dict = {
         "max": 2000
     },
     HEATER_POWER: {
-        "format": "^[0-9]{3,5}$",
-        "min": 500,
-        "max": 10000
+        "format": "^[0-9]{1,4}$",
+        "min": 1,
+        "max": 1000
     }
 }
 
