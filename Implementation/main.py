@@ -45,6 +45,19 @@ class my_Entry(ttk.Entry):
         if lc_command is not None:
             self.bind("<Button-3>", func=lc_command)
 
+def my_showinfo(title: str, obj_name: str, entry_dict: dict):
+    entry = entry_dict[title]
+    msg =   f"{obj_name} entry properties:\n"\
+            f"- min: {entry['min']}\n"\
+            f"- max: {entry['max']}\n"
+    if 'float_type' in entry.keys():
+        msg += "- Floating point type"
+    elif 'time_type' in entry.keys():
+        msg += "- Time type"
+    else:
+        msg += "- Integer type"
+    messagebox.showinfo(title=title, message=msg)
+
 
 class MainWindow(tk.Tk):
     def __init__(self):
@@ -192,10 +205,7 @@ class SimulationFrame(tk.Frame):
 
         ttk.Label(self, text="Sample rate: \t samples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
         my_Entry(self, width=3, name=constants.SAMPLES_ENTRY, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.SAMPLES_ENTRY, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.SAMPLES_ENTRY]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.SAMPLES_ENTRY]['max']}")).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
+                 lc_command=lambda x: my_showinfo(title=constants.SAMPLES_ENTRY, obj_name="Sample rate", entry_dict=constants.entries_validation_dict)).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
 
         self.process_states_board_frame = ttk.Frame(self, style="pstates.TFrame")
         self.process_states_board_frame.grid(column=4, row=0, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
@@ -211,7 +221,7 @@ class SimulationFrame(tk.Frame):
 
         # temporally, remove upon release
         self.temporary_button = ttk.Button(self.process_states_board_frame, text="Fill test data", command=self.fill_test_data)
-        self.temporary_button.grid(column=0, row=5, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
+        self.temporary_button.grid(column=0, row=5, columnspan=2, padx=(10, 10), pady=(10, 10), sticky=tk.NW)
 
     def fill_test_data(self):   # temporally, remove upon release
         self.simulation_state = constants.SimulatorStates.DATA
@@ -284,49 +294,34 @@ class InputsFrame(tk.Frame):
         self.create_ui()
 
     def create_ui(self):
-        ttk.Label(self, text="Water Initial Temperature: ").grid(column=0, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
+        ttk.Label(self, text="Water initial temperature: ").grid(column=0, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
         water_iT_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         water_iT_frame.grid(column=1, row=0, padx=20, pady=(20, 10), sticky=tk.NSEW)
         my_Entry(water_iT_frame, width=8, name=constants.WATER_ITEMP, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.WATER_ITEMP, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.WATER_ITEMP]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.WATER_ITEMP]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.WATER_ITEMP, obj_name="Water initial temperature", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_iT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
         
 
-        ttk.Label(self, text="Target Water Temperature: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self, text="Water Target Temperature: ").grid(column=0, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_tT_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         water_tT_frame.grid(column=1, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(water_tT_frame, width=8, name=constants.WATER_TTEMP, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.WATER_TTEMP, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.WATER_TTEMP]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.WATER_TTEMP]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.WATER_TTEMP, obj_name="Water target temperature", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_tT_frame, text="°C").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Boiler dimensions: ").grid(column=0, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         boiler_dimensions_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         ttk.Label(boiler_dimensions_frame, text="Height: ").grid(column=0, row=0, sticky=tk.NSEW)
         my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_HEIGHT, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.BOILER_HEIGHT, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.BOILER_HEIGHT]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.BOILER_HEIGHT]['max']}")).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.BOILER_HEIGHT, obj_name="Height", entry_dict=constants.entries_validation_dict)).grid(column=1, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=2, row=0, padx=(0, 10), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="Width: ").grid(column=3, row=0, sticky=tk.NSEW)
         my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_WIDTH, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.BOILER_WIDTH, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.BOILER_WIDTH]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.BOILER_WIDTH]['max']}")).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.BOILER_WIDTH, obj_name="Width", entry_dict=constants.entries_validation_dict)).grid(column=4, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=5, row=0, padx=(0, 10), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="Depth: ").grid(column=6, row=0, sticky=tk.NSEW)
         my_Entry(boiler_dimensions_frame, width=4, name=constants.BOILER_DEPTH, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.BOILER_DEPTH, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.BOILER_DEPTH]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.BOILER_DEPTH]['max']}")).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.BOILER_DEPTH, obj_name="Depth", entry_dict=constants.entries_validation_dict)).grid(column=7, row=0, padx=0, pady=(0, 0), sticky=tk.NSEW)
         ttk.Label(boiler_dimensions_frame, text="cm").grid(column=8, row=0, padx=(0, 0), sticky=tk.NSEW)
         boiler_dimensions_frame.grid(column=1, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
 
@@ -351,54 +346,39 @@ class InputsFrame(tk.Frame):
         self.water_out_scale.grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.NW)
 
-        ttk.Label(self, text="Heater Efficiency: ").grid(column=3, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
+        ttk.Label(self, text="Heater efficiency: ").grid(column=3, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
         heater_efficiency_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         heater_efficiency_frame.grid(column=4, row=0, padx=20, pady=(20, 10), sticky=tk.NSEW)
         my_Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_EFFICIENCY, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.HEATER_EFFICIENCY]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.HEATER_EFFICIENCY]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.HEATER_EFFICIENCY, obj_name="Heater efficiency", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_efficiency_frame, text="%").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Heater maximum power: ").grid(column=3, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_pow_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         heater_pow_frame.grid(column=4, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(heater_pow_frame, width=8, name=constants.HEATER_POWER, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_POWER, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.HEATER_POWER]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.HEATER_POWER]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.HEATER_POWER, obj_name="Heater maximum power", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_pow_frame, text="kJ").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Desired water amount: ").grid(column=3, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_amount_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         water_amount_frame.grid(column=4, row=2, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.WATER_AMOUNT, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.WATER_AMOUNT]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.WATER_AMOUNT]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.WATER_AMOUNT, obj_name="Desired water amount", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Intake valve flow capacity: ").grid(column=3, row=3, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         invalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         invalve_cap_frame.grid(column=4, row=3, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(invalve_cap_frame, width=8, name=constants.INTAKE_FLOW, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.INTAKE_FLOW, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.INTAKE_FLOW]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.INTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.INTAKE_FLOW, obj_name="Intake valve flow capacity", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(invalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Outtake valve flow capacity: ").grid(column=3, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         outvalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         outvalve_cap_frame.grid(column=4, row=4, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(outvalve_cap_frame, width=8, name=constants.OUTTAKE_FLOW, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.OUTTAKE_FLOW, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+                 lc_command=lambda x: my_showinfo(title=constants.OUTTAKE_FLOW, obj_name="Outtake valve flow capacity", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(outvalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
 
         self.heater_pid_frame = ttk.Frame(self, style="statistics.TFrame")
@@ -407,24 +387,15 @@ class InputsFrame(tk.Frame):
 
         ttk.Label(self.heater_pid_frame, text="Kp: ", style="statistics.TLabel").grid(column=0, row=1, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
         my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KP, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KP, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KP]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KP]['max']}")).grid(column=1, row=1, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+                 lc_command=lambda x: my_showinfo(title=constants.HEATER_PID_KP, obj_name="Kp", entry_dict=constants.entries_validation_dict)).grid(column=1, row=1, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
 
         ttk.Label(self.heater_pid_frame, text="Ki: ", style="statistics.TLabel").grid(column=0, row=2, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
         my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KI, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KI, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KI]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KI]['max']}")).grid(column=1, row=2, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+                 lc_command=lambda x: my_showinfo(title=constants.HEATER_PID_KI, obj_name="Ki", entry_dict=constants.entries_validation_dict)).grid(column=1, row=2, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
 
         ttk.Label(self.heater_pid_frame, text="Kd: ", style="statistics.TLabel").grid(column=0, row=3, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
         my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KD, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KD, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KD]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KD]['max']}")).grid(column=1, row=3, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+                 lc_command=lambda x: my_showinfo(title=constants.HEATER_PID_KD, obj_name="Kd", entry_dict=constants.entries_validation_dict)).grid(column=1, row=3, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
 
         ttk.Label(self, text="To get help on the acceptable values, click with the right mouse button on the desired entry.",
                   foreground="#808080", cursor='question_arrow').grid(column=0, row=7, columnspan=2, padx=(20, 0), pady=(10, 10), sticky=tk.NW)
@@ -572,17 +543,21 @@ def logic_thread(root):
         # temporally, remove upon release
         if simulation_new_state == constants.SimulatorStates.DATA:
             data_all = {
-                'samples_entry': ['5', True, ""], 
-                'water_initial_temperature_entry': ['25', True, ""], 
-                'water_target_temperature_entry': ['50', True, ""], 
-                'boiler_height_entry': ['100', True, ""], 
-                'boiler_width_entry': ['100', True, ""], 
-                'boiler_depth_entry': ['100', True, ""], 
-                'heater_efficiency_entry': ['99', True, ""],
-                'desired_water_amount_entry': ['5', True, ""],
-                'intake_valve_flow_entry': ['1000', True, ""],
-                'outtake_valve_flow_entry': ['1000', True, ""],
-                'heater_power_entry': ['10000', True, ""]}
+                'samples_entry': [5, True, ""], 
+                'water_initial_temperature_entry': [20, True, ""], 
+                'water_target_temperature_entry': [100, True, ""], 
+                'boiler_height_entry': [100, True, ""], 
+                'boiler_width_entry': [100, True, ""], 
+                'boiler_depth_entry': [100, True, ""], 
+                'heater_efficiency_entry': [99, True, ], 
+                'heater_power_entry': [10000, True, ""], 
+                'desired_water_amount_entry': [10, True, ""], 
+                'intake_valve_flow_entry': [1000, True, ""], 
+                'outtake_valve_flow_entry': [1000, True, ""], 
+                'heater_pid_kp': [1.5, True, ""], 
+                'heater_pid_ki': [1, True, ""], 
+                'heater_pid_kd': [0.05, True, ""]
+                }
             root.notebook_frames[0].simulation_state = constants.SimulatorStates.READY            
 
         # validate entered values upon simulator start
@@ -641,7 +616,6 @@ def logic_thread(root):
                     root.config(cursor="watch")
 
                 except Exception as e:
-                    print(e)
                     root.notebook_frames[0].restart()
                     root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED
                     simulation_new_state = constants.SimulatorStates.STOPPED
