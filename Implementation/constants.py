@@ -51,7 +51,9 @@ WATER_AMOUNT = 'desired_water_amount_entry'
 INTAKE_FLOW = 'intake_valve_flow_entry'
 OUTTAKE_FLOW = 'outtake_valve_flow_entry'
 HEATER_POWER = 'heater_power_entry'
-
+HEATER_PID_KP = 'heater_pid_kp'
+HEATER_PID_KI = 'heater_pid_ki'
+HEATER_PID_KD = 'heater_pid_kd'
 
 
 # available entries: format, min, max, float_type, time_type
@@ -110,6 +112,24 @@ entries_validation_dict = {
         "format": "^[0-9]{1,4}$",
         "min": 1,
         "max": 1000
+    },
+    HEATER_PID_KD: {
+        "format": "^[0-9]{1,3}(\.[0-9]{1,4})?$",
+        "min": 0,
+        "max": 100,
+        "float_type": True
+    },
+    HEATER_PID_KI: {
+        "format": "^[0-9]{1,3}(\.[0-9]{1,4})?$",
+        "min": 0,
+        "max": 100,
+        "float_type": True
+    },
+    HEATER_PID_KP: {
+        "format": "^[0-9]{1,3}(\.[0-9]{1,4})?$",
+        "min": 0,
+        "max": 100,
+        "float_type": True
     }
 }
 

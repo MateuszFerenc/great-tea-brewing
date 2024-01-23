@@ -86,7 +86,7 @@ class Functions:
         self.heater_power = heater_power
 
     def pouringwater(self):
-        self.V = round(self.V + (self.Q_in/1000) * self.dTime, 1)
+        self.V = self.V + (self.Q_in/1000) * self.dTime
         print(f"self.V: {self.V}, time: {self.Time} s, Q_in: {self.Q_in}")
         self.water_mass = self.rho * (self.V / 1000)
 

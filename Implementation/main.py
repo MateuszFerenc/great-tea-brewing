@@ -170,7 +170,7 @@ class SimulationFrame(tk.Frame):
         self.image_height = 640
 
         self.schematic = ttk.Label(self, image=None, borderwidth=1, relief='solid')
-        self.schematic.grid(column=0, row=0, columnspan=4, sticky=tk.N)
+        self.schematic.grid(column=0, row=0, columnspan=4, sticky=tk.NW)
 
         self.update_schematic()
 
@@ -335,26 +335,25 @@ class InputsFrame(tk.Frame):
         heater_setpoint_frame.grid(column=1, columnspan=2, row=4, padx=20, pady=(0, 10), sticky=tk.NW)
         self.heater_power_scale=tk.Scale(heater_setpoint_frame, orient="horizontal", cursor="plus", from_=constants.entries_validation_dict[constants.WATER_ITEMP]['max'], to= 120, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=15)
         self.heater_power_scale.grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(heater_setpoint_frame, text="°C").grid(column=1, row=0, sticky=tk.N)
+        ttk.Label(heater_setpoint_frame, text="°C").grid(column=1, row=0, sticky=tk.NW)
 
         ttk.Label(self, text="Pouring water in flow: ").grid(column=0, row=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_intake_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         water_intake_frame.grid(column=1, columnspan=2, row=5, padx=20, pady=(0, 10), sticky=tk.NW)
         self.water_in_scale=tk.Scale(water_intake_frame, orient="horizontal", cursor="plus", from_=1, to=100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_in_scale.grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(water_intake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
-
+        ttk.Label(water_intake_frame, text="%").grid(column=1, row=0, sticky=tk.NW)
 
         ttk.Label(self, text="Pouring water out flow: ").grid(column=0, row=6, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_outtake_frame = ttk.Frame(self, style="LittleFrame.TFrame")
         water_outtake_frame.grid(column=1, columnspan=2, row=6, padx=20, pady=(0, 20), sticky=tk.NW)
         self.water_out_scale=tk.Scale(water_outtake_frame, orient="horizontal", cursor="plus", from_=1, to= 100, length = 400, resolution = 1, background=constants.window_background_color, highlightthickness=0, font=("Consolas", 10, "bold"), tickinterval=25)
         self.water_out_scale.grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.N)
+        ttk.Label(water_outtake_frame, text="%").grid(column=1, row=0, sticky=tk.NW)
 
-        ttk.Label(self, text="Heater Efficiency: ").grid(column=0, row=7, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self, text="Heater Efficiency: ").grid(column=3, row=0, padx=(20, 0), pady=(20, 10), sticky=tk.NW)
         heater_efficiency_frame = ttk.Frame(self, style="LittleFrame.TFrame")
-        heater_efficiency_frame.grid(column=1, row=7, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        heater_efficiency_frame.grid(column=4, row=0, padx=20, pady=(20, 10), sticky=tk.NSEW)
         my_Entry(heater_efficiency_frame, width=8, name=constants.HEATER_EFFICIENCY, font= ("Consolas", 10, "bold"),
                  lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_EFFICIENCY, 
                                                 message=
@@ -362,39 +361,9 @@ class InputsFrame(tk.Frame):
                                                 f"max: {constants.entries_validation_dict[constants.HEATER_EFFICIENCY]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_efficiency_frame, text="%").grid(column=1, row=0, sticky=tk.NSEW)
 
-        ttk.Label(self, text="Desired water amount: ").grid(column=0, row=8, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        water_amount_frame = ttk.Frame(self, style="LittleFrame.TFrame")
-        water_amount_frame.grid(column=1, row=8, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        my_Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.WATER_AMOUNT, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.WATER_AMOUNT]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.WATER_AMOUNT]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
-
-        ttk.Label(self, text="Intake valve flow capacity: ").grid(column=0, row=9, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        invalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
-        invalve_cap_frame.grid(column=1, row=9, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        my_Entry(invalve_cap_frame, width=8, name=constants.INTAKE_FLOW, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.INTAKE_FLOW, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.INTAKE_FLOW]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.INTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(invalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
-
-        ttk.Label(self, text="Outtake valve flow capacity: ").grid(column=0, row=10, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
-        outvalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
-        outvalve_cap_frame.grid(column=1, row=10, padx=20, pady=(0, 10), sticky=tk.NSEW)
-        my_Entry(outvalve_cap_frame, width=8, name=constants.OUTTAKE_FLOW, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: messagebox.showinfo(title=constants.OUTTAKE_FLOW, 
-                                                message=
-                                                f"min: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['min']}\n"
-                                                f"max: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(outvalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
-
-        ttk.Label(self, text="Heater maximum power: ").grid(column=0, row=11, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self, text="Heater maximum power: ").grid(column=3, row=1, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         heater_pow_frame = ttk.Frame(self, style="LittleFrame.TFrame")
-        heater_pow_frame.grid(column=1, row=11, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        heater_pow_frame.grid(column=4, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(heater_pow_frame, width=8, name=constants.HEATER_POWER, font= ("Consolas", 10, "bold"),
                  lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_POWER, 
                                                 message=
@@ -402,8 +371,63 @@ class InputsFrame(tk.Frame):
                                                 f"max: {constants.entries_validation_dict[constants.HEATER_POWER]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
         ttk.Label(heater_pow_frame, text="kJ").grid(column=1, row=0, sticky=tk.NSEW)
 
+        ttk.Label(self, text="Desired water amount: ").grid(column=3, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        water_amount_frame = ttk.Frame(self, style="LittleFrame.TFrame")
+        water_amount_frame.grid(column=4, row=2, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(water_amount_frame, width=8, name=constants.WATER_AMOUNT, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.WATER_AMOUNT, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.WATER_AMOUNT]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.WATER_AMOUNT]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(water_amount_frame, text="L").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Intake valve flow capacity: ").grid(column=3, row=3, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        invalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
+        invalve_cap_frame.grid(column=4, row=3, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(invalve_cap_frame, width=8, name=constants.INTAKE_FLOW, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.INTAKE_FLOW, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.INTAKE_FLOW]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.INTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(invalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
+
+        ttk.Label(self, text="Outtake valve flow capacity: ").grid(column=3, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        outvalve_cap_frame = ttk.Frame(self, style="LittleFrame.TFrame")
+        outvalve_cap_frame.grid(column=4, row=4, padx=20, pady=(0, 10), sticky=tk.NSEW)
+        my_Entry(outvalve_cap_frame, width=8, name=constants.OUTTAKE_FLOW, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.OUTTAKE_FLOW, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.OUTTAKE_FLOW]['max']}")).grid(column=0, row=0, sticky=tk.NSEW)
+        ttk.Label(outvalve_cap_frame, text="mL/s").grid(column=1, row=0, sticky=tk.NSEW)
+
+        self.heater_pid_frame = ttk.Frame(self, style="statistics.TFrame")
+        self.heater_pid_frame.grid(column=3, row=5, columnspan=2, rowspan=5, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+        ttk.Label(self.heater_pid_frame, text="Heater PID:", style="statistics.TLabel").grid(column=0, row=0, columnspan=2, padx=(10, 10), pady=(10, 10), sticky=tk.NW)
+
+        ttk.Label(self.heater_pid_frame, text="Kp: ", style="statistics.TLabel").grid(column=0, row=1, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
+        my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KP, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KP, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KP]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KP]['max']}")).grid(column=1, row=1, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+
+        ttk.Label(self.heater_pid_frame, text="Ki: ", style="statistics.TLabel").grid(column=0, row=2, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
+        my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KI, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KI, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KI]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KI]['max']}")).grid(column=1, row=2, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+
+        ttk.Label(self.heater_pid_frame, text="Kd: ", style="statistics.TLabel").grid(column=0, row=3, padx=(20, 10), pady=(0, 10), sticky=tk.NW)
+        my_Entry(self.heater_pid_frame, width=8, name=constants.HEATER_PID_KD, font= ("Consolas", 10, "bold"),
+                 lc_command=lambda x: messagebox.showinfo(title=constants.HEATER_PID_KD, 
+                                                message=
+                                                f"min: {constants.entries_validation_dict[constants.HEATER_PID_KD]['min']}\n"
+                                                f"max: {constants.entries_validation_dict[constants.HEATER_PID_KD]['max']}")).grid(column=1, row=3, padx=(0, 10), pady=(0, 0), sticky=tk.NW)
+
         ttk.Label(self, text="To get help on the acceptable values, click with the right mouse button on the desired entry.",
-                  foreground="#808080", cursor='question_arrow').grid(column=0, row=12, columnspan=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
+                  foreground="#808080", cursor='question_arrow').grid(column=0, row=7, columnspan=2, padx=(20, 0), pady=(10, 10), sticky=tk.NW)
 
 
 class OutputsFrame(tk.Frame):
@@ -473,6 +497,11 @@ class OutputsFrame(tk.Frame):
         self.boiler_heat_time = ttk.Label(self.statistics_frame, text="---", style="statistics.TLabel")
         self.boiler_heat_time.grid(column=1, row=3, sticky=tk.NSEW)
         ttk.Label(self.statistics_frame, text="s", style="statistics.TLabel").grid(column=2, row=3, sticky=tk.NSEW)
+
+        ttk.Label(self.statistics_frame, text="Average heater power: ", style="statistics.TLabel").grid(column=0, row=4, padx=(20, 10), pady=(10, 10), sticky=tk.NSEW)
+        self.heater_avg_pwr = ttk.Label(self.statistics_frame, text="---", style="statistics.TLabel")
+        self.heater_avg_pwr.grid(column=1, row=3, sticky=tk.NSEW)
+        ttk.Label(self.statistics_frame, text="kJ", style="statistics.TLabel").grid(column=2, row=4, sticky=tk.NSEW)
 
 
 class GraphsFrame(tk.Frame):
@@ -605,6 +634,9 @@ def logic_thread(root):
 
                     operators.resetoperator()
                     ms, sec, min = 0, 0, 0
+                    root.notebook_frames[2].boiler_fill_time.configure(text="---")
+                    root.notebook_frames[2].boiler_drain_time.configure(text="---")
+                    root.notebook_frames[2].boiler_heat_time.configure(text="---")
 
                     root.config(cursor="watch")
 
