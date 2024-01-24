@@ -183,32 +183,36 @@ class SimulationFrame(tk.Frame):
         self.image_height = 640
 
         self.schematic = ttk.Label(self, image=None, borderwidth=1, relief='solid')
-        self.schematic.grid(column=0, row=0, columnspan=4, sticky=tk.NW)
+        self.schematic.grid(column=0, row=0, columnspan=5, sticky=tk.NW)
 
         self.update_schematic()
 
 
-        self.start_button = ttk.Button(self, text="Start", command=self.start)
+        self.start_button = ttk.Button(self, text="⏵ Start", command=self.start)
         self.start_button.grid(column=0, row=1, sticky=tk.NSEW)
 
-        self.pause_button = ttk.Button(self, text="Pause", command=self.pause, state=tk.DISABLED)
+        self.pause_button = ttk.Button(self, text="⏸ Pause", command=self.pause, state=tk.DISABLED)
         self.pause_button.grid(column=1, row=1, sticky=tk.NSEW)
 
-        self.restart_button = ttk.Button(self, text="Restart", command=self.restart, state=tk.DISABLED)
+        self.restart_button = ttk.Button(self, text="↻ Restart", command=self.restart, state=tk.DISABLED)
         self.restart_button.grid(column=2, row=1, sticky=tk.NSEW)
 
-        self.rewind_button = ttk.Button(self, text="Rewind", command=self.rewind)
+        self.rewind_button = ttk.Button(self, text="⏭ Rewind", command=self.rewind)
         self.rewind_button.grid(column=3, row=1, sticky=tk.NSEW)
 
-        self.timer_label = ttk.Label(self, text="Time: --- min -- s --- ms")
-        self.timer_label.grid(column=4, row=1, padx=(30,0), pady=(0, 0), sticky=tk.E)
+        # temporally, remove upon release
+        self.temporary_button = ttk.Button(self, text="Fill example data", command=self.fill_test_data)
+        self.temporary_button.grid(column=4, row=1, sticky=tk.NSEW)
 
-        ttk.Label(self, text="Sample rate: \t samples/s").grid(column=5, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
+        self.timer_label = ttk.Label(self, text="Time: --- min -- s --- ms")
+        self.timer_label.grid(column=5, row=1, padx=(30,0), pady=(0, 0), sticky=tk.E)
+
+        ttk.Label(self, text="Sample rate: \t samples/s").grid(column=6, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.E)
         my_Entry(self, width=3, name=constants.SAMPLES_ENTRY, font= ("Consolas", 10, "bold"),
-                 lc_command=lambda x: my_showinfo(title=constants.SAMPLES_ENTRY, obj_name="Sample rate", entry_dict=constants.entries_validation_dict)).grid(column=5, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
+                 lc_command=lambda x: my_showinfo(title=constants.SAMPLES_ENTRY, obj_name="Sample rate", entry_dict=constants.entries_validation_dict)).grid(column=6, row=1, padx=(110, 0), pady=(0, 0), ipadx=0, sticky=tk.W)
 
         self.process_states_board_frame = ttk.Frame(self, style="pstates.TFrame")
-        self.process_states_board_frame.grid(column=4, row=0, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
+        self.process_states_board_frame.grid(column=5, row=0, columnspan=2, padx=(40, 0), pady=(40, 0), sticky=tk.NW)
         ttk.Label(self.process_states_board_frame, text="Process states:", background="#999999").grid(column=0, row=0, columnspan=2, padx=(10, 0), pady=(10, 0), sticky=tk.W)
         ttk.Label(self.process_states_board_frame, text="●", name="ps_run", background="#999999", font=(20)).grid(column=0, row=1, padx=(20, 0), pady=(0, 0), sticky=tk.W)
         ttk.Label(self.process_states_board_frame, text="RUN", background="#999999").grid(column=1, row=1, padx=(10, 20), pady=(0, 0), sticky=tk.W)
@@ -218,10 +222,6 @@ class SimulationFrame(tk.Frame):
         ttk.Label(self.process_states_board_frame, text="Boiler draining", background="#999999").grid(column=1, row=3, padx=(10, 20), pady=(0, 0), sticky=tk.W)
         ttk.Label(self.process_states_board_frame, text="●", name="ps_heat", background="#999999", font=(20)).grid(column=0, row=4, padx=(20, 0), pady=(0, 10), sticky=tk.W)
         ttk.Label(self.process_states_board_frame, text="Heating", background="#999999").grid(column=1, row=4, padx=(10, 20), pady=(0, 10), sticky=tk.W)
-
-        # temporally, remove upon release
-        self.temporary_button = ttk.Button(self.process_states_board_frame, text="Fill test data", command=self.fill_test_data)
-        self.temporary_button.grid(column=0, row=5, columnspan=2, padx=(10, 10), pady=(10, 10), sticky=tk.NW)
 
     def fill_test_data(self):   # temporally, remove upon release
         self.simulation_state = constants.SimulatorStates.DATA
