@@ -471,7 +471,7 @@ class OutputsFrame(tk.Frame):
 
         ttk.Label(self.statistics_frame, text="Average heater power: ", style="statistics.TLabel").grid(column=0, row=4, padx=(20, 10), pady=(10, 10), sticky=tk.NSEW)
         self.heater_avg_pwr = ttk.Label(self.statistics_frame, text="---", style="statistics.TLabel")
-        self.heater_avg_pwr.grid(column=1, row=3, sticky=tk.NSEW)
+        self.heater_avg_pwr.grid(column=1, row=4, sticky=tk.NSEW)
         ttk.Label(self.statistics_frame, text="kJ", style="statistics.TLabel").grid(column=2, row=4, sticky=tk.NSEW)
 
 
@@ -511,7 +511,7 @@ sim_frames = list(globals()[c] for c, x in globals().copy().items() if re.match(
 # create list of class types defined in this scope
 
 
-def logic_thread(root):
+def logic_thread(root: MainWindow):
     simulation_counter = 0
     tick_counter = 0
     simulation_old_state, simulation_new_state = constants.SimulatorStates.STOPPED, constants.SimulatorStates.STOPPED
@@ -543,21 +543,31 @@ def logic_thread(root):
         # temporally, remove upon release
         if simulation_new_state == constants.SimulatorStates.DATA:
             data_all = {
-                'samples_entry': [5, True, ""], 
-                'water_initial_temperature_entry': [20, True, ""], 
-                'water_target_temperature_entry': [100, True, ""], 
-                'boiler_height_entry': [100, True, ""], 
-                'boiler_width_entry': [100, True, ""], 
-                'boiler_depth_entry': [100, True, ""], 
-                'heater_efficiency_entry': [99, True, ], 
-                'heater_power_entry': [10000, True, ""], 
-                'desired_water_amount_entry': [10, True, ""], 
-                'intake_valve_flow_entry': [1000, True, ""], 
-                'outtake_valve_flow_entry': [1000, True, ""], 
-                'heater_pid_kp': [1.5, True, ""], 
-                'heater_pid_ki': [1, True, ""], 
-                'heater_pid_kd': [0.05, True, ""]
+                'samples_entry': 5, 
+                'water_initial_temperature_entry': 20, 
+                'water_target_temperature_entry': 100, 
+                'boiler_height_entry': 100, 
+                'boiler_width_entry': 100, 
+                'boiler_depth_entry': 100, 
+                'heater_efficiency_entry': 99, 
+                'heater_power_entry': 1000, 
+                'desired_water_amount_entry': 50, 
+                'intake_valve_flow_entry': 1000, 
+                'outtake_valve_flow_entry': 1000, 
+                'heater_pid_kp': 1.5, 
+                'heater_pid_ki': 1, 
+                'heater_pid_kd': 0.05
                 }
+            for frame in root.notebook_frames:
+                entries = rsearch_forentry(frame)
+                if entries is not None:
+                    for entry in entries:
+                        if entry._name in data_all.keys():
+                            val = data_all[entry._name]
+                            data_all[entry._name] = (val, True, entry)
+                            root.nametowidget(entry).delete(0,tk.END)
+                            root.nametowidget(entry).insert(0, val)
+            
             root.notebook_frames[0].simulation_state = constants.SimulatorStates.READY            
 
         # validate entered values upon simulator start
@@ -590,10 +600,10 @@ def logic_thread(root):
                     water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
                     water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
                     
-                    operators.pouringinitialize(desired_water, water_Qin, water_Qout)
-                    operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), 5000)
+                    operators.pouringinitialize(target_water=desired_water, Q_in=water_Qin, Q_out=water_Qout)
+                    operators.heatinginitialize(initial_temperature=int(data_all[constants.WATER_ITEMP][0]), target_temperature=int(data_all[constants.WATER_TTEMP][0]))
                     operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
-                    operators.update_heater(power=1000, heater_efficiency=0.95, environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
+                    operators.update_heater(power=int(data_all[constants.HEATER_POWER][0]), heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
 
                     scale_sample = []
 
@@ -603,7 +613,7 @@ def logic_thread(root):
                         operators.update_dtime(simulation_sampling_rate)
                         simulation_sleep = constants.simulation_tick / 1000
                     else:   # REWIND run mode
-                        operators.update_dtime(constants.simulation_rewind_delay * 100000)
+                        operators.update_dtime(simulation_sampling_rate)
                         simulation_sleep = constants.simulation_rewind_delay / 1000000
                         root.config(cursor="watch")
 
@@ -612,8 +622,6 @@ def logic_thread(root):
                     root.notebook_frames[2].boiler_fill_time.configure(text="---")
                     root.notebook_frames[2].boiler_drain_time.configure(text="---")
                     root.notebook_frames[2].boiler_heat_time.configure(text="---")
-
-                    root.config(cursor="watch")
 
                 except Exception as e:
                     root.notebook_frames[0].restart()
@@ -635,21 +643,19 @@ def logic_thread(root):
                 heater_power = int(data_all[constants.HEATER_POWER][0])
                     
                 desired_water = int(data_all[constants.WATER_AMOUNT][0])
-                operators.pouringinitialize(desired_water, water_Qin, water_Qout)
-                operators.heatinginitialize(int(data_all[constants.WATER_ITEMP][0]), int(data_all[constants.WATER_TTEMP][0]), heater_power)
+                operators.pouringinitialize(target_water=desired_water, Q_in=water_Qin, Q_out=water_Qout)
+                operators.heatinginitialize(initial_temperature=int(data_all[constants.WATER_ITEMP][0]), target_temperature=int(data_all[constants.WATER_TTEMP][0]))
                 operators.update_boiler(int(data_all[constants.BOILER_WIDTH][0]), int(data_all[constants.BOILER_DEPTH][0]), int(data_all[constants.BOILER_HEIGHT][0]), heat_loss=0.01)
-                operators.update_heater(power=1000, heater_efficiency=0.95, environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
+                operators.update_heater(power=int(data_all[constants.HEATER_POWER][0]), heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
                 scale_sample = []
                 simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
                 heater_PID.set_limits(min_ = 0, max_ = heater_power)
                 
-
                 if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
                     operators.update_dtime(simulation_sampling_rate)
                     simulation_sleep = constants.simulation_tick / 1000
                 else:   # REWIND run mode
-                    # operators.update_dtime(constants.simulation_rewind_delay * 100000)
-                    operators.update_dtime(simulation_sampling_rate*constants.simulation_rewind_delay*10)
+                    operators.update_dtime(simulation_sampling_rate)
                     simulation_sleep = constants.simulation_rewind_delay / 1000000
                     root.config(cursor="watch")
 

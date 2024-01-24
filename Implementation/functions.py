@@ -24,7 +24,8 @@ class Functions:
         self.heater_c = 385                                                 # specific heat of heater [J/(kg*K)]
         self.heater_setpoint = 100                                          # heater temperature setpoint [°C]
         self.heater_temperature = 0                                         # heater actual temperature [°C]
-        self.heater_power = 1000                                            # heater power [J]
+        self.heater_max_power = 0                                           # heater maximum power [J]
+        self.heater_power = 0                                               # heater actual power [J]
         
         # boiler parameters
         self.boiler_d = 0.1                                                 # boiler depth [m]
@@ -80,10 +81,9 @@ class Functions:
         self.Q_in = Q_in
         self.Q_out = Q_out
 
-    def heatinginitialize(self, initial_temperature: float, target_temperature: float, heater_power: int):
+    def heatinginitialize(self, initial_temperature: float, target_temperature: float):
         self.water_temp = initial_temperature
         self.target_temperature = target_temperature
-        self.heater_power = heater_power
 
     def pouringwater(self):
         self.V = self.V + (self.Q_in/1000) * self.dTime
