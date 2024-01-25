@@ -44,8 +44,8 @@ class Functions:
         self.Time = 0
         self.dTime = 1
 
-    def update_dtime(self, sample_time: int):
-        self.dTime = round(1 / sample_time, 6)
+    def update_dtime(self, samples_ps: int):
+        self.dTime = round(1 / samples_ps, 6)
 
     def update_boiler(self, width: int, height: int, depth: int, heat_loss: float = 0.5):
         self.boiler_w = width
@@ -75,6 +75,8 @@ class Functions:
         self.heater_powers = []
         self.heater_setpoints = []
         self.Time = 0
+        self.V = 0
+        self.water_temp = 0
 
     def pouringinitialize(self, target_water: float, Q_in, Q_out):
         self.target_water = target_water
@@ -85,24 +87,26 @@ class Functions:
         self.water_temp = initial_temperature
         self.target_temperature = target_temperature
 
-    def pouringwater(self):
-        self.V = self.V + (self.Q_in/1000) * self.dTime
-        print(f"self.V: {self.V}, time: {self.Time} s, Q_in: {self.Q_in}")
-        self.water_mass = self.rho * (self.V / 1000)
+    def pouringwater(self, sample_ready: bool = True):
+        if sample_ready:
+            self.V = self.V + (self.Q_in/1000) * self.dTime
+            self.water_mass = self.rho * (self.V / 1000)
 
-    def drainingwater(self):
-        self.V = self.V - (self.Q_out/1000) * self.dTime
-        if self.V < 0.5:
-            self.V = 0
-        self.water_mass = self.rho * (self.V / 1000)
+    def drainingwater(self, sample_ready: bool = True):
+        if sample_ready:
+            self.V = self.V - (self.Q_out/1000) * self.dTime
+            if self.V < 0.001:
+                self.V = 0
+            self.water_mass = self.rho * (self.V / 1000)
 
-    def heatingupwater(self):
-        Q_heat = self.heater_power * self.heater_efficiency
-        Q_loss = self.heater_power * self.heat_loss * (self.water_temp - self.T_env)
-        dt_heat = Q_heat / ( self.water_mass * self.water_c )
-        dt_loss = Q_loss / ( self.water_mass * self.water_c )
-        #print(f'Q_heat: {Q_heat}, Q_loss: {Q_loss}, dt_heat: {dt_heat}, dt_loss: {dt_loss}')
-        self.water_temp = self.water_temp + dt_heat - dt_loss
+    def heatingupwater(self, sample_ready: bool = True):
+        if sample_ready:
+            Q_heat = self.heater_power * self.heater_efficiency
+            Q_loss = self.heater_power * self.heat_loss * (self.water_temp - self.T_env)
+            dt_heat = Q_heat / ( self.water_mass * self.water_c )
+            dt_loss = Q_loss / ( self.water_mass * self.water_c )
+            #print(f'Q_heat: {Q_heat}, Q_loss: {Q_loss}, dt_heat: {dt_heat}, dt_loss: {dt_loss}')
+            self.water_temp = self.water_temp + dt_heat - dt_loss
 
     def temp_reached_target(self):
         return self.water_temp >= self.target_temperature
@@ -133,7 +137,7 @@ class PID:
         self.error = self.setpoint - actual
         self.integral += self._get_limit(self.error * dt, self._limits)
         self.derivative = (self.error - self.last_error) / dt
-        self.output = self._get_limit(self.Kp * self.error + self.Ki * self.integral + self.Kd * self.derivative, self._limits)
+        self.output = get_limit(self.Kp * self.error + self.Ki * self.integral + self.Kd * self.derivative, self._limits)
         self.last_error = self.error
 
     def reset(self):
@@ -150,13 +154,14 @@ class PID:
     def set_limits(self, min_, max_):
         self._limits = (min_, max_)
 
-    @staticmethod
-    def _get_limit(value, limits):
-        lower, upper = limits
-        if value is None:
-            return None
-        elif (upper is not None) and (value > upper):
-            return upper
-        elif (lower is not None) and (value < lower):
-            return lower
-        return value
+
+def get_limit(value, limits):
+    lower, upper = limits
+    if value is None:
+        return None
+    elif (upper is not None) and (value > upper):
+        return upper
+    elif (lower is not None) and (value < lower):
+        return lower
+    return value
+    

@@ -522,13 +522,14 @@ def logic_thread(root: MainWindow):
     boiler_Ftime = 0
     boiler_Dtime = 0
     boiler_Htime = 0
+    sample_ready = False
 
     process_state = constants.ProcessStates.IDLE
 
     simulation_sampling_rate = constants.simulation_default_sampling
     
     operators = functions.Functions()
-    scale_sample = []
+    heater_setpoint = []
 
     root.notebook_frames[1].heater_power_scale.set(100)
     root.notebook_frames[1].water_in_scale.set(50)
@@ -568,7 +569,7 @@ def logic_thread(root: MainWindow):
                             root.nametowidget(entry).delete(0,tk.END)
                             root.nametowidget(entry).insert(0, val)
             
-            root.notebook_frames[0].simulation_state = constants.SimulatorStates.READY            
+            root.notebook_frames[0].simulation_state = constants.SimulatorStates.STOPPED            
 
         # validate entered values upon simulator start
         if ( simulation_new_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND) ):
@@ -600,12 +601,13 @@ def logic_thread(root: MainWindow):
                     water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
                     water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
                     
+                    operators.resetoperator()
                     operators.pouringinitialize(target_water=desired_water, Q_in=water_Qin, Q_out=water_Qout)
                     operators.heatinginitialize(initial_temperature=int(data_all[constants.WATER_ITEMP][0]), target_temperature=int(data_all[constants.WATER_TTEMP][0]))
                     operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
                     operators.update_heater(power=int(data_all[constants.HEATER_POWER][0]), heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
 
-                    scale_sample = []
+                    heater_setpoint = []
 
                     simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
 
@@ -617,7 +619,6 @@ def logic_thread(root: MainWindow):
                         simulation_sleep = constants.simulation_rewind_delay / 1000000
                         root.config(cursor="watch")
 
-                    operators.resetoperator()
                     ms, sec, min = 0, 0, 0
                     root.notebook_frames[2].boiler_fill_time.configure(text="---")
                     root.notebook_frames[2].boiler_drain_time.configure(text="---")
@@ -630,44 +631,15 @@ def logic_thread(root: MainWindow):
 
                 finally:
                     select_invalid(root, data_all)
-            # remove upon release
-            elif simulation_old_state == constants.SimulatorStates.READY:
-                ms, sec, min = 0, 0, 0
-                
-                operators.resetoperator()
-                root.notebook_frames[2].boiler_fill_time.configure(text="---")
-                root.notebook_frames[2].boiler_drain_time.configure(text="---")
-                root.notebook_frames[2].boiler_heat_time.configure(text="---")
-                water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
-                water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
-                heater_power = int(data_all[constants.HEATER_POWER][0])
-                    
-                desired_water = int(data_all[constants.WATER_AMOUNT][0])
-                operators.pouringinitialize(target_water=desired_water, Q_in=water_Qin, Q_out=water_Qout)
-                operators.heatinginitialize(initial_temperature=int(data_all[constants.WATER_ITEMP][0]), target_temperature=int(data_all[constants.WATER_TTEMP][0]))
-                operators.update_boiler(int(data_all[constants.BOILER_WIDTH][0]), int(data_all[constants.BOILER_DEPTH][0]), int(data_all[constants.BOILER_HEIGHT][0]), heat_loss=0.01)
-                operators.update_heater(power=int(data_all[constants.HEATER_POWER][0]), heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
-                scale_sample = []
-                simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
-                heater_PID.set_limits(min_ = 0, max_ = heater_power)
-                
-                if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
-                    operators.update_dtime(simulation_sampling_rate)
-                    simulation_sleep = constants.simulation_tick / 1000
-                else:   # REWIND run mode
-                    operators.update_dtime(simulation_sampling_rate)
-                    simulation_sleep = constants.simulation_rewind_delay / 1000000
-                    root.config(cursor="watch")
 
         # make sample every simulation loop iteration, calculate relation sample time to simulation tick
         if ( ( simulation_counter >= 1000/simulation_sampling_rate ) and simulation_new_state == constants.SimulatorStates.RUNNING):
             simulation_counter = 0
-            operators.append_sample()
+            sample_ready = True
 
             operators.Q_in = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
             operators.Q_out = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
-
-            scale_sample.append(root.notebook_frames[1].heater_power_scale.get())   
+  
             root.notebook_frames[2].current_temperature_out.configure(text=round(operators.water_temp, 2))
             root.notebook_frames[2].current_water_level_out.configure(text=int(operators.V))
             root.notebook_frames[2].current_water_intake_out.configure(text=operators.Q_in)
@@ -683,9 +655,9 @@ def logic_thread(root: MainWindow):
             pass
         if ( ( graph_select_new != graph_select_old ) or not ( tick_counter * constants.simulation_tick ) % constants.graph_update_time ):
             if root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_temp']:
-                display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.water_temperatures)
+                display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.water_temperatures, heater_setpoint)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['heat_pwr']:
-                display_heater_power_graph(root.notebook_frames[3], operators.samples, scale_sample)
+                display_heater_power_graph(root.notebook_frames[3], operators.samples, heater_setpoint)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_lvl']:
                 display_water_level_graph(root.notebook_frames[3], operators.samples, operators.water_levels)
         graph_select_old = graph_select_new
@@ -696,7 +668,8 @@ def logic_thread(root: MainWindow):
             process_state = constants.ProcessStates.IDLE
 
             ms, sec, min = 0, 0, 0
-            scale_sample = []
+            sample_ready = False
+            heater_setpoint = []
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
             root.notebook_frames[2].current_temperature_out.configure(text="---")
             root.notebook_frames[2].current_water_level_out.configure(text="---")
@@ -708,13 +681,14 @@ def logic_thread(root: MainWindow):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_heat").configure(foreground='black')
             root.config(cursor="")
             root.notebook_frames[0].update_schematic()
+            operators.resetoperator()
 
             simulation_sleep = constants.simulation_tick / 1000
 
 
         if simulation_new_state == constants.SimulatorStates.RUNNING:
             ms, sec, min = count_time(ms, sec, min, ms_incr=constants.simulation_tick)
-            simulation_counter += constants.simulation_tick
+            simulation_counter += simulation_sleep * 1000
 
         if ( simulation_new_state == constants.SimulatorStates.PAUSED and simulation_old_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND) ):
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
@@ -722,9 +696,15 @@ def logic_thread(root: MainWindow):
         if simulation_new_state in (constants.SimulatorStates.RUNNING, constants.SimulatorStates.REWIND):
             water_state = operators.return_in_range(operators.V, operators.boiler_volume)
             fill_state = operators.return_in_range(root.notebook_frames[1].water_in_scale.get()/100, 1)
-            drain_state = operators.return_in_range(root.notebook_frames[1].water_out_scale.get()/100, 1)
+            drain_state = operators.return_in_range(root.notebook_frames[1].water_out_scale.get()/100, 1) 
+            
+            sample_condition = simulation_new_state == constants.SimulatorStates.REWIND or sample_ready
 
-            operators.append_sample()
+            if sample_condition:
+                heater_setpoint.append(root.notebook_frames[1].heater_power_scale.get())
+                if len(heater_setpoint) > 2:
+                    if heater_setpoint[-1] != heater_setpoint[-2]:
+                        operators.target_temperature = heater_setpoint[-1]
 
             if process_state == constants.ProcessStates.IDLE:
                 # change process state to FILLING
@@ -741,7 +721,7 @@ def logic_thread(root: MainWindow):
                     boiler_Htime = operators.Time
                 else:
                     # pour water into boiler until target water amount is not reached
-                    operators.pouringwater()
+                    operators.pouringwater(sample_ready=sample_condition)
                     # update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
                         root.notebook_frames[0].update_schematic(water_state=water_state, fill_state=fill_state)
@@ -754,7 +734,7 @@ def logic_thread(root: MainWindow):
                     boiler_Dtime = operators.Time
                 else:
                     # heat up water until target temperature is not reached
-                    operators.heatingupwater()
+                    operators.heatingupwater(sample_ready=sample_condition)
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
                         root.notebook_frames[0].update_schematic(water_state=water_state)
             elif process_state == constants.ProcessStates.DRAINING:
@@ -781,23 +761,29 @@ def logic_thread(root: MainWindow):
                     simulation_sleep = constants.simulation_tick / 1000
                 else:
                     # drain water from the boiler, until it's empty
-                    operators.drainingwater()
+                    operators.drainingwater(sample_ready=sample_condition)
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
                         root.notebook_frames[0].update_schematic(water_state=water_state, drain_state=drain_state)
+
+            if sample_ready:
+                sample_ready = False
             
             if simulation_new_state == constants.SimulatorStates.REWIND:
                 # rewind simulation mode
-                ...
+                operators.append_sample()
             else:   
                 # realtime simulation mode
                 root.notebook_frames[0].timer_label.configure(text=f"Time: {min:003n} min {sec:02n} s {ms:003n} ms")
+                if sample_condition:
+                    operators.append_sample()
                 
         sleep(simulation_sleep)
         tick_counter += 1
         
-def display_water_temperature_graph(root, x_vals, y_vals):
+def display_water_temperature_graph(root, time_base, c_temp, sp_temp):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r", label='current temperature')
+    root.ax.plot(time_base, c_temp, color="r", label='current temperature')
+    root.ax.plot(time_base, sp_temp, color="g", label='target temperature')
     root.ax.set_ylim((0, 110))
     root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("T [°C]")
@@ -806,21 +792,21 @@ def display_water_temperature_graph(root, x_vals, y_vals):
     root.ax.legend()
     root.canvas.draw()
 
-def display_heater_power_graph(root, x_vals, y_vals):
+def display_heater_power_graph(root, time_base, pwr_setpoint):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r", label='power setpoint')
-    root.ax.set_ylim((0, 100))
+    root.ax.plot(time_base, pwr_setpoint, color="r", label='power setpoint')
+    root.ax.set_ylim((0, max(pwr_setpoint, default=constants.entries_validation_dict[constants.HEATER_POWER]["max"])*1.2))
     root.ax.set_xlabel("t [s]")
-    root.ax.set_ylabel("P [W]")
+    root.ax.set_ylabel("P [kJ]")
     root.ax.set_title(label=constants.plot_names['heat_pwr'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
     root.ax.legend()
     root.canvas.draw()
 
-def display_water_level_graph(root, x_vals, y_vals):
+def display_water_level_graph(root, time_base, c_waterlvl):
     root.ax.clear()
-    root.ax.plot(x_vals, y_vals, color="r", label='current water level')
-    root.ax.set_ylim((-1, max(y_vals, default=constants.entries_validation_dict[constants.WATER_AMOUNT]["max"])*1.2))
+    root.ax.plot(time_base, c_waterlvl, color="r", label='current water level')
+    root.ax.set_ylim((0, max(c_waterlvl, default=constants.entries_validation_dict[constants.WATER_AMOUNT]["max"])*1.2))
     root.ax.set_xlabel("t [s]")
     root.ax.set_ylabel("V [L]")
     root.ax.set_title(label=constants.plot_names['water_lvl'])
