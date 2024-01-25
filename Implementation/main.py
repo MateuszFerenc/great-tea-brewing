@@ -7,6 +7,7 @@ import re
 from threading import Thread
 from time import sleep
 from os.path import join
+from statistics import mean
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -358,7 +359,7 @@ class InputsFrame(tk.Frame):
         heater_pow_frame.grid(column=4, row=1, padx=20, pady=(0, 10), sticky=tk.NSEW)
         my_Entry(heater_pow_frame, width=8, name=constants.HEATER_POWER, font= ("Consolas", 10, "bold"),
                  lc_command=lambda x: my_showinfo(title=constants.HEATER_POWER, obj_name="Heater maximum power", entry_dict=constants.entries_validation_dict)).grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(heater_pow_frame, text="kJ").grid(column=1, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_pow_frame, text="J").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Desired water amount: ").grid(column=3, row=2, padx=(20, 0), pady=(0, 10), sticky=tk.NW)
         water_amount_frame = ttk.Frame(self, style="LittleFrame.TFrame")
@@ -431,7 +432,7 @@ class OutputsFrame(tk.Frame):
         heater_power_frame.grid(column=1, row=2, padx=20, pady=(0, 10), sticky=tk.NSEW)
         self.current_heater_power_out = ttk.Label(heater_power_frame, text="---")
         self.current_heater_power_out.grid(column=0, row=0, sticky=tk.NSEW)
-        ttk.Label(heater_power_frame, text="kJ").grid(column=1, row=0, sticky=tk.NSEW)
+        ttk.Label(heater_power_frame, text="J").grid(column=1, row=0, sticky=tk.NSEW)
 
         ttk.Label(self, text="Water intake: ").grid(column=0, row=3, padx=(20, 0), pady=(0, 10), sticky=tk.NSEW)
         water_intake_frame = ttk.Frame(self, style="LittleFrame.TFrame")
@@ -472,7 +473,7 @@ class OutputsFrame(tk.Frame):
         ttk.Label(self.statistics_frame, text="Average heater power: ", style="statistics.TLabel").grid(column=0, row=4, padx=(20, 10), pady=(10, 10), sticky=tk.NSEW)
         self.heater_avg_pwr = ttk.Label(self.statistics_frame, text="---", style="statistics.TLabel")
         self.heater_avg_pwr.grid(column=1, row=4, sticky=tk.NSEW)
-        ttk.Label(self.statistics_frame, text="kJ", style="statistics.TLabel").grid(column=2, row=4, sticky=tk.NSEW)
+        ttk.Label(self.statistics_frame, text="J", style="statistics.TLabel").grid(column=2, row=4, sticky=tk.NSEW)
 
 
 class GraphsFrame(tk.Frame):
@@ -530,12 +531,15 @@ def logic_thread(root: MainWindow):
     
     operators = functions.Functions()
     heater_setpoint = []
+    heater_pid_set = []
+    heater_actual_power = []
 
     root.notebook_frames[1].heater_power_scale.set(100)
     root.notebook_frames[1].water_in_scale.set(50)
     root.notebook_frames[1].water_out_scale.set(50)
 
     heater_PID = functions.PID(1.5, 1, 0.05)
+    heater_PID.setpoint = 100
 
     while 1:
         simulation_old_state = simulation_new_state
@@ -547,11 +551,11 @@ def logic_thread(root: MainWindow):
                 'samples_entry': 5, 
                 'water_initial_temperature_entry': 20, 
                 'water_target_temperature_entry': 100, 
-                'boiler_height_entry': 100, 
-                'boiler_width_entry': 100, 
-                'boiler_depth_entry': 100, 
+                'boiler_height_entry': 50, 
+                'boiler_width_entry': 50, 
+                'boiler_depth_entry': 50, 
                 'heater_efficiency_entry': 99, 
-                'heater_power_entry': 1000, 
+                'heater_power_entry': 2000, 
                 'desired_water_amount_entry': 50, 
                 'intake_valve_flow_entry': 1000, 
                 'outtake_valve_flow_entry': 1000, 
@@ -600,14 +604,21 @@ def logic_thread(root: MainWindow):
                     
                     water_Qin = int(data_all[constants.INTAKE_FLOW][0]) * (root.notebook_frames[1].water_in_scale.get() / 100)
                     water_Qout = int(data_all[constants.OUTTAKE_FLOW][0]) * (root.notebook_frames[1].water_out_scale.get() / 100)
+                    heating_setpoint = root.notebook_frames[1].heater_power_scale.get()
+                    heater_max_power = int(data_all[constants.HEATER_POWER][0])
                     
                     operators.resetoperator()
                     operators.pouringinitialize(target_water=desired_water, Q_in=water_Qin, Q_out=water_Qout)
                     operators.heatinginitialize(initial_temperature=int(data_all[constants.WATER_ITEMP][0]), target_temperature=int(data_all[constants.WATER_TTEMP][0]))
                     operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
-                    operators.update_heater(power=int(data_all[constants.HEATER_POWER][0]), heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=root.notebook_frames[1].heater_power_scale.get())
+                    operators.update_heater(power=0, heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=heating_setpoint, heater_max_pwr=heater_max_power)
 
+                    heater_PID.set_limits(0, heater_max_power)
+                    heater_PID.setpoint = heating_setpoint
                     heater_setpoint = []
+                    heater_pid_set = []
+                    heater_actual_power = []
+                    heater_PID.output = int(data_all[constants.HEATER_POWER][0])
 
                     simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
 
@@ -623,6 +634,7 @@ def logic_thread(root: MainWindow):
                     root.notebook_frames[2].boiler_fill_time.configure(text="---")
                     root.notebook_frames[2].boiler_drain_time.configure(text="---")
                     root.notebook_frames[2].boiler_heat_time.configure(text="---")
+                    root.notebook_frames[2].heater_avg_pwr.configure(text="---")
 
                 except Exception as e:
                     root.notebook_frames[0].restart()
@@ -644,6 +656,7 @@ def logic_thread(root: MainWindow):
             root.notebook_frames[2].current_water_level_out.configure(text=int(operators.V))
             root.notebook_frames[2].current_water_intake_out.configure(text=operators.Q_in)
             root.notebook_frames[2].current_water_outtake_out.configure(text=operators.Q_out) 
+            root.notebook_frames[2].current_heater_power_out.configure(text=int(operators.heater_power)) 
 
         if ( tick_counter > 65000):
             tick_counter = 0
@@ -657,7 +670,7 @@ def logic_thread(root: MainWindow):
             if root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_temp']:
                 display_water_temperature_graph(root.notebook_frames[3], operators.samples, operators.water_temperatures, heater_setpoint)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['heat_pwr']:
-                display_heater_power_graph(root.notebook_frames[3], operators.samples, heater_setpoint)
+                display_heater_power_graph(root.notebook_frames[3], operators.samples, heater_setpoint, heater_pid_set, heater_actual_power)
             elif root.notebook_frames[3].graphs_list.get(graph_select_new) == constants.plot_names['water_lvl']:
                 display_water_level_graph(root.notebook_frames[3], operators.samples, operators.water_levels)
         graph_select_old = graph_select_new
@@ -670,11 +683,14 @@ def logic_thread(root: MainWindow):
             ms, sec, min = 0, 0, 0
             sample_ready = False
             heater_setpoint = []
+            heater_pid_set = []
+            heater_actual_power = []
             root.notebook_frames[0].timer_label.configure(text=f"Time: --- min -- s --- ms")
             root.notebook_frames[2].current_temperature_out.configure(text="---")
             root.notebook_frames[2].current_water_level_out.configure(text="---")
             root.notebook_frames[2].current_water_intake_out.configure(text="---")
             root.notebook_frames[2].current_water_outtake_out.configure(text="---")
+            root.notebook_frames[2].current_heater_power_out.configure(text="---") 
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_run").configure(foreground='black')
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_fill").configure(foreground='black')
             root.notebook_frames[0].process_states_board_frame.nametowidget("ps_drain").configure(foreground='black')
@@ -702,6 +718,9 @@ def logic_thread(root: MainWindow):
 
             if sample_condition:
                 heater_setpoint.append(root.notebook_frames[1].heater_power_scale.get())
+                heater_PID.setpoint = heater_setpoint[-1]
+                heater_pid_set.append(heater_PID.output)
+                heater_actual_power.append(operators.heater_power)
                 if len(heater_setpoint) > 2:
                     if heater_setpoint[-1] != heater_setpoint[-2]:
                         operators.target_temperature = heater_setpoint[-1]
@@ -721,7 +740,8 @@ def logic_thread(root: MainWindow):
                     boiler_Htime = operators.Time
                 else:
                     # pour water into boiler until target water amount is not reached
-                    operators.pouringwater(sample_ready=sample_condition)
+                    if sample_condition:
+                        operators.pouringwater()
                     # update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
                         root.notebook_frames[0].update_schematic(water_state=water_state, fill_state=fill_state)
@@ -734,15 +754,19 @@ def logic_thread(root: MainWindow):
                     boiler_Dtime = operators.Time
                 else:
                     # heat up water until target temperature is not reached
-                    operators.heatingupwater(sample_ready=sample_condition)
+                    if sample_condition:
+                        operators.heatingupwater()
+                        operators.heater_power = heater_PID.output
+                        heater_PID.compute(operators.dTime, operators.water_temp)
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
-                        root.notebook_frames[0].update_schematic(water_state=water_state)
+                        root.notebook_frames[0].update_schematic(water_state=water_state, heater_state=operators.return_in_range(operators.heater_power, operators.heater_max_power))
             elif process_state == constants.ProcessStates.DRAINING:
                 if operators.V == 0:
                     boiler_Dtime = -(boiler_Dtime - operators.Time)
                     root.notebook_frames[2].boiler_fill_time.configure(text=round(boiler_Ftime, 2))
                     root.notebook_frames[2].boiler_drain_time.configure(text=round(boiler_Dtime, 2))
                     root.notebook_frames[2].boiler_heat_time.configure(text=round(boiler_Htime, 2))
+                    root.notebook_frames[2].heater_avg_pwr.configure(text=round(mean(heater_actual_power), 2))
                     # go into IDLE state after cycle is finished
                     process_state = constants.ProcessStates.IDLE
                     root.notebook_frames[0].update_schematic()
@@ -754,6 +778,7 @@ def logic_thread(root: MainWindow):
                     root.notebook_frames[2].current_water_level_out.configure(text="---")
                     root.notebook_frames[2].current_water_intake_out.configure(text="---")
                     root.notebook_frames[2].current_water_outtake_out.configure(text="---")
+                    root.notebook_frames[2].current_heater_power_out.configure(text="---") 
                     root.notebook_frames[1].heater_power_scale.set(100)
                     root.notebook_frames[1].water_in_scale.set(50)
                     root.notebook_frames[1].water_out_scale.set(50)
@@ -761,7 +786,8 @@ def logic_thread(root: MainWindow):
                     simulation_sleep = constants.simulation_tick / 1000
                 else:
                     # drain water from the boiler, until it's empty
-                    operators.drainingwater(sample_ready=sample_condition)
+                    if sample_condition:
+                        operators.drainingwater()
                     if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
                         root.notebook_frames[0].update_schematic(water_state=water_state, drain_state=drain_state)
 
@@ -792,12 +818,13 @@ def display_water_temperature_graph(root, time_base, c_temp, sp_temp):
     root.ax.legend()
     root.canvas.draw()
 
-def display_heater_power_graph(root, time_base, pwr_setpoint):
+def display_heater_power_graph(root, time_base, pwr_setpoint, pid_set, actual_pwr):
     root.ax.clear()
-    root.ax.plot(time_base, pwr_setpoint, color="r", label='power setpoint')
-    root.ax.set_ylim((0, max(pwr_setpoint, default=constants.entries_validation_dict[constants.HEATER_POWER]["max"])*1.2))
+    root.ax.plot(time_base, pwr_setpoint, color="g", label='temp setpoint [°C]')
+    root.ax.plot(time_base, pid_set, color="b", label='PID output [J]')
+    root.ax.plot(time_base, actual_pwr, color="r", label='Actual power [J]')
     root.ax.set_xlabel("t [s]")
-    root.ax.set_ylabel("P [kJ]")
+    root.ax.set_ylabel("P [J]")
     root.ax.set_title(label=constants.plot_names['heat_pwr'])
     root.ax.grid(visible=True, linestyle=':', linewidth=0.5)
     root.ax.legend()

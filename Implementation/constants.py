@@ -109,9 +109,9 @@ entries_validation_dict = {
         "max": 2000
     },
     HEATER_POWER: {
-        "format": "^[0-9]{1,4}$",
+        "format": "^[0-9]{1,5}$",
         "min": 1,
-        "max": 1000
+        "max": 10000
     },
     HEATER_PID_KD: {
         "format": "^[0-9]{1,3}(\.[0-9]{1,4})?$",
