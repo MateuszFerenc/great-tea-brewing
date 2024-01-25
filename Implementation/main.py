@@ -613,6 +613,7 @@ def logic_thread(root: MainWindow):
                     operators.update_boiler(boiler_width, boiler_depth, boiler_height, heat_loss=0.05)
                     operators.update_heater(power=0, heater_efficiency=int(data_all[constants.HEATER_EFFICIENCY][0]), environment_temperature=25, heater_setpoint=heating_setpoint, heater_max_pwr=heater_max_power)
 
+                    heater_PID.reset()
                     heater_PID.set_limits(0, heater_max_power)
                     heater_PID.setpoint = heating_setpoint
                     heater_setpoint = []
@@ -622,11 +623,10 @@ def logic_thread(root: MainWindow):
 
                     simulation_sampling_rate = int(data_all[constants.SAMPLES_ENTRY][0])
 
+                    operators.update_dtime(simulation_sampling_rate)
                     if simulation_new_state == constants.SimulatorStates.RUNNING:   # REALTIME run mode
-                        operators.update_dtime(simulation_sampling_rate)
                         simulation_sleep = constants.simulation_tick / 1000
                     else:   # REWIND run mode
-                        operators.update_dtime(simulation_sampling_rate)
                         simulation_sleep = constants.simulation_rewind_delay / 1000000
                         root.config(cursor="watch")
 
@@ -742,8 +742,7 @@ def logic_thread(root: MainWindow):
                     # pour water into boiler until target water amount is not reached
                     if sample_condition:
                         operators.pouringwater()
-                    # update_schematic(self, heater_state: int = 0, fill_state: int = 0, drain_state: int = 0, water_state: int = 0):
-                    if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simualtion mode
+                    if simulation_new_state == constants.SimulatorStates.RUNNING:       # no need to redraw schematic during fast forward simulation mode
                         root.notebook_frames[0].update_schematic(water_state=water_state, fill_state=fill_state)
             elif process_state == constants.ProcessStates.HEATING:
                 if operators.temp_reached_target():
