@@ -27,3 +27,5 @@ Zastrzegamy prawo do wykorzystania informacji zawartych w tym projekcie, oraz zr
 
 ***Pełna treść klauzuli znajduje się w dokumentacji***:   
 Design &#8594; Documentation &#8594; NEW &#8594;Dokumentacja_GreatTeeBrewing.pdf
+
+# Projekt został zarchiwizowany w związku z jego zakończeniem
